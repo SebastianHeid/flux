@@ -2203,6 +2203,7 @@ class FineTuningDataset(BaseDataset):
                     abs_path = image_key
                 else:
                     # わりといい加減だがいい方法が思いつかん
+                    
                     paths = glob_images(subset.image_dir, image_key)
                     if len(paths) > 0:
                         abs_path = paths[0]
@@ -2212,10 +2213,9 @@ class FineTuningDataset(BaseDataset):
                     if os.path.exists(os.path.splitext(image_key)[0] + ".npz"):
                         abs_path = os.path.splitext(image_key)[0] + ".npz"
                     else:
-                        npz_path = os.path.join(subset.image_dir, image_key + ".npz")
+                        npz_path = os.path.join(subset.image_dir, image_key)
                         if os.path.exists(npz_path):
                             abs_path = npz_path
-
                 assert abs_path is not None, f"no image / 画像がありません: {image_key}"
 
                 caption = img_md.get("caption")
@@ -2282,14 +2282,14 @@ class FineTuningDataset(BaseDataset):
 
             if not npz_any:
                 use_npz_latents = False
-                logger.warning(f"npz file does not exist. ignore npz files / npzファイルが見つからないためnpzファイルを無視します")
+                logger.warning(f"npz file does not exist. ignore npz files ")
             elif not npz_all:
                 use_npz_latents = False
                 logger.warning(
-                    f"some of npz file does not exist. ignore npz files / いくつかのnpzファイルが見つからないためnpzファイルを無視します"
+                    f"some of npz file does not exist. ignore npz files "
                 )
                 if flip_aug_in_subset:
-                    logger.warning("maybe no flipped files / 反転されたnpzファイルがないのかもしれません")
+                    logger.warning("maybe no flipped files ")
         # else:
         #   logger.info("npz files are not used with color_aug and/or random_crop / color_augまたはrandom_cropが指定されているためnpzファイルは使用されません")
 
@@ -2308,12 +2308,12 @@ class FineTuningDataset(BaseDataset):
             if use_npz_latents:
                 use_npz_latents = False
                 logger.warning(
-                    f"npz files exist, but no bucket info in metadata. ignore npz files / メタデータにbucket情報がないためnpzファイルを無視します"
+                    f"npz files exist, but no bucket info in metadata. ignore npz files "
                 )
 
             assert (
                 resolution is not None
-            ), "if metadata doesn't have bucket info, resolution is required / メタデータにbucket情報がない場合はresolutionを指定してください"
+            ), "if metadata doesn't have bucket info, resolution is required "
 
             self.enable_bucket = enable_bucket
             if self.enable_bucket:
@@ -2326,13 +2326,13 @@ class FineTuningDataset(BaseDataset):
                 self.bucket_no_upscale = bucket_no_upscale
         else:
             if not enable_bucket:
-                logger.info("metadata has bucket info, enable bucketing / メタデータにbucket情報があるためbucketを有効にします")
-            logger.info("using bucket info in metadata / メタデータ内のbucket情報を使います")
+                logger.info("metadata has bucket info, enable bucketing ")
+            logger.info("using bucket info in metadata ")
             self.enable_bucket = True
 
             assert (
                 not bucket_no_upscale
-            ), "if metadata has bucket info, bucket reso is precalculated, so bucket_no_upscale cannot be used / メタデータ内にbucket情報がある場合はbucketの解像度は計算済みのため、bucket_no_upscaleは使えません"
+            ), "if metadata has bucket info, bucket reso is precalculated, so bucket_no_upscale cannot be used "
 
             # bucket情報を初期化しておく、make_bucketsで再作成しない
             self.bucket_manager = BucketManager(False, None, None, None, None)
@@ -2951,6 +2951,7 @@ def load_image(image_path, alpha=False):
 def trim_and_resize_if_required(
     random_crop: bool, image: np.ndarray, reso, resized_size: Tuple[int, int], resize_interpolation: Optional[str] = None
 ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[int, int, int, int]]:
+    
     image_height, image_width = image.shape[0:2]
     original_size = (image_width, image_height)  # size before resize
 
@@ -5319,20 +5320,20 @@ def prepare_dataset_args(args: argparse.Namespace, support_metadata: bool):
             args.resolution = (args.resolution[0], args.resolution[0])
         assert (
             len(args.resolution) == 2
-        ), f"resolution must be 'size' or 'width,height' / resolution（解像度）は'サイズ'または'幅','高さ'で指定してください: {args.resolution}"
+        ), f"resolution must be 'size' or 'width,height' : {args.resolution}"
 
     if args.face_crop_aug_range is not None:
         args.face_crop_aug_range = tuple([float(r) for r in args.face_crop_aug_range.split(",")])
         assert (
             len(args.face_crop_aug_range) == 2 and args.face_crop_aug_range[0] <= args.face_crop_aug_range[1]
-        ), f"face_crop_aug_range must be two floats / face_crop_aug_rangeは'下限,上限'で指定してください: {args.face_crop_aug_range}"
+        ), f"face_crop_aug_range must be two floats: {args.face_crop_aug_range}"
     else:
         args.face_crop_aug_range = None
 
     if support_metadata:
         if args.in_json is not None and (args.color_aug or args.random_crop):
             logger.warning(
-                f"latents in npz is ignored when color_aug or random_crop is True / color_augまたはrandom_cropを有効にした場合、npzファイルのlatentsは無視されます"
+                f"latents in npz is ignored when color_aug or random_crop is True"
             )
 
 

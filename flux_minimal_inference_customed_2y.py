@@ -389,8 +389,8 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/test/test.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/flux1-dev.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/test/test-000001.safetensors")
     parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/text_encoder/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ae", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/ae.safetensors")
@@ -421,7 +421,9 @@ if __name__ == "__main__":
     parser.add_argument("--interactive", action="store_true")
     parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
     parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
-    parser.add_argument("--image_name", type=str, default="test_org.png")
+    parser.add_argument("--image_name", type=str, default="")
+    parser.add_argument("--single_b",  action='store_true')
+    parser.add_argument("--double_b",  action='store_true')
     args = parser.parse_args()
 
     seed = args.seed
@@ -531,20 +533,55 @@ if __name__ == "__main__":
         lora_models.append(lora_model)
 
     if not args.interactive:
-        generate_image(
-            model,
-            clip_l,
-            t5xxl,
-            ae,
-            args.prompt,
-            args.seed,
-            args.width,
-            args.height,
-            args.steps,
-            args.guidance,
-            args.negative_prompt,
-            args.cfg_scale,
-        )
+        if args.single_b:
+            print("single block")
+            for idx in range(37):
+                is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
+                model.eval()
+                logger.info(f"Casting model to {flux_dtype}")
+                model.to(flux_dtype)  # make sure model is dtype
+                print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+                model = modify_model(model, args.double_blocks, [idx])
+                print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+                args.output_dir = "/export/home/sheid/flux_train_code/images/single_block" + str(idx)
+                generate_image(
+                    model,
+                    clip_l,
+                    t5xxl,
+                    ae,
+                    args.prompt,
+                    args.seed,
+                    args.width,
+                    args.height,
+                    args.steps,
+                    args.guidance,
+                    args.negative_prompt,
+                    args.cfg_scale,
+                )
+        if args.double_b:
+            for idx in range(19):
+                is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
+                model.eval()
+                logger.info(f"Casting model to {flux_dtype}")
+                model.to(flux_dtype)  # make sure model is dtype
+                print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+                model = modify_model(model,[idx], args.single_blocks)
+                print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+                args.output_dir ="/export/home/sheid/flux_train_code/images/double_block" + str(idx)
+                generate_image(
+                    model,
+                    clip_l,
+                    t5xxl,
+                    ae,
+                    args.prompt,
+                    args.seed,
+                    args.width,
+                    args.height,
+                    args.steps,
+                    args.guidance,
+                    args.negative_prompt,
+                    args.cfg_scale,
+                )
     else:
         # loop for interactive
         width = target_width

@@ -389,8 +389,8 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/test/test.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/flux1-dev.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/test/test-000001.safetensors")
     parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/text_encoder/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ae", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/ae.safetensors")
@@ -421,7 +421,8 @@ if __name__ == "__main__":
     parser.add_argument("--interactive", action="store_true")
     parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
     parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
-    parser.add_argument("--image_name", type=str, default="test_org.png")
+    parser.add_argument("--image_name", type=str, default="")
+    parser.add_argument("--image_begin", type=str, default="")
     args = parser.parse_args()
 
     seed = args.seed
@@ -446,18 +447,12 @@ if __name__ == "__main__":
         accelerator = accelerate.Accelerator(mixed_precision="bf16")
     else:
         accelerator = None
-        
-        
-        
+    
     is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
     model.eval()
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
     print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    model = modify_model(model, args.double_blocks, args.single_blocks)
-    print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    
-    
     
 
     logger.info(f"Loading t5xxl from {args.t5xxl}...")
@@ -529,73 +524,81 @@ if __name__ == "__main__":
             lora_model.to(device)
 
         lora_models.append(lora_model)
+    
+    name = args.image_begin
+    for idx, single_block in enumerate(args.single_blocks):
+    
+        model = modify_model(model, args.double_blocks, [single_block])
+        print("Number of reduced flux model: ", sum(p.numel() for p in model.parameters()))
+        name += str(args.single_blocks[idx]) + "_"
+        args.image_name = name + ".png"
 
-    if not args.interactive:
-        generate_image(
-            model,
-            clip_l,
-            t5xxl,
-            ae,
-            args.prompt,
-            args.seed,
-            args.width,
-            args.height,
-            args.steps,
-            args.guidance,
-            args.negative_prompt,
-            args.cfg_scale,
-        )
-    else:
-        # loop for interactive
-        width = target_width
-        height = target_height
-        steps = None
-        guidance = args.guidance
-        cfg_scale = args.cfg_scale
-
-        while True:
-            print(
-                "Enter prompt (empty to exit). Options: --w <width> --h <height> --s <steps> --d <seed> --g <guidance> --m <multipliers for LoRA>"
-                " --n <negative prompt>, `-` for empty negative prompt --c <cfg_scale>"
+        if not args.interactive:
+            generate_image(
+                model,
+                clip_l,
+                t5xxl,
+                ae,
+                args.prompt,
+                args.seed,
+                args.width,
+                args.height,
+                args.steps,
+                args.guidance,
+                args.negative_prompt,
+                args.cfg_scale,
             )
-            prompt = input()
-            if prompt == "":
-                break
+        else:
+            # loop for interactive
+            width = target_width
+            height = target_height
+            steps = None
+            guidance = args.guidance
+            cfg_scale = args.cfg_scale
 
-            # parse options
-            options = prompt.split("--")
-            prompt = options[0].strip()
-            seed = None
-            negative_prompt = None
-            for opt in options[1:]:
-                try:
-                    opt = opt.strip()
-                    if opt.startswith("w"):
-                        width = int(opt[1:].strip())
-                    elif opt.startswith("h"):
-                        height = int(opt[1:].strip())
-                    elif opt.startswith("s"):
-                        steps = int(opt[1:].strip())
-                    elif opt.startswith("d"):
-                        seed = int(opt[1:].strip())
-                    elif opt.startswith("g"):
-                        guidance = float(opt[1:].strip())
-                    elif opt.startswith("m"):
-                        mutipliers = opt[1:].strip().split(",")
-                        if len(mutipliers) != len(lora_models):
-                            logger.error(f"Invalid number of multipliers, expected {len(lora_models)}")
-                            continue
-                        for i, lora_model in enumerate(lora_models):
-                            lora_model.set_multiplier(float(mutipliers[i]))
-                    elif opt.startswith("n"):
-                        negative_prompt = opt[1:].strip()
-                        if negative_prompt == "-":
-                            negative_prompt = ""
-                    elif opt.startswith("c"):
-                        cfg_scale = float(opt[1:].strip())
-                except ValueError as e:
-                    logger.error(f"Invalid option: {opt}, {e}")
+            while True:
+                print(
+                    "Enter prompt (empty to exit). Options: --w <width> --h <height> --s <steps> --d <seed> --g <guidance> --m <multipliers for LoRA>"
+                    " --n <negative prompt>, `-` for empty negative prompt --c <cfg_scale>"
+                )
+                prompt = input()
+                if prompt == "":
+                    break
 
-            generate_image(model, clip_l, t5xxl, ae, prompt, seed, width, height, steps, guidance, negative_prompt, cfg_scale)
+                # parse options
+                options = prompt.split("--")
+                prompt = options[0].strip()
+                seed = None
+                negative_prompt = None
+                for opt in options[1:]:
+                    try:
+                        opt = opt.strip()
+                        if opt.startswith("w"):
+                            width = int(opt[1:].strip())
+                        elif opt.startswith("h"):
+                            height = int(opt[1:].strip())
+                        elif opt.startswith("s"):
+                            steps = int(opt[1:].strip())
+                        elif opt.startswith("d"):
+                            seed = int(opt[1:].strip())
+                        elif opt.startswith("g"):
+                            guidance = float(opt[1:].strip())
+                        elif opt.startswith("m"):
+                            mutipliers = opt[1:].strip().split(",")
+                            if len(mutipliers) != len(lora_models):
+                                logger.error(f"Invalid number of multipliers, expected {len(lora_models)}")
+                                continue
+                            for i, lora_model in enumerate(lora_models):
+                                lora_model.set_multiplier(float(mutipliers[i]))
+                        elif opt.startswith("n"):
+                            negative_prompt = opt[1:].strip()
+                            if negative_prompt == "-":
+                                negative_prompt = ""
+                        elif opt.startswith("c"):
+                            cfg_scale = float(opt[1:].strip())
+                    except ValueError as e:
+                        logger.error(f"Invalid option: {opt}, {e}")
+
+                generate_image(model, clip_l, t5xxl, ae, prompt, seed, width, height, steps, guidance, negative_prompt, cfg_scale)
 
     logger.info("Done!")
