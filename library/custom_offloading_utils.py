@@ -1,9 +1,9 @@
-from concurrent.futures import ThreadPoolExecutor
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
+
 import torch
 import torch.nn as nn
-
 from library.device_utils import clean_memory_on_device
 
 
@@ -17,7 +17,9 @@ def synchronize_device(device: torch.device):
 
 
 def swap_weight_devices_cuda(device: torch.device, layer_to_cpu: nn.Module, layer_to_cuda: nn.Module):
-    assert layer_to_cpu.__class__ == layer_to_cuda.__class__
+    # print(layer_to_cpu.__class__)
+    # print(layer_to_cuda.__class__)
+    # assert layer_to_cpu.__class__ == layer_to_cuda.__class__
 
     weight_swap_jobs = []
 

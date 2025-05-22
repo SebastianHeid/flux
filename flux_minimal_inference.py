@@ -6,20 +6,20 @@ import math
 import os
 import random
 from typing import Callable, List, Optional
+
+import accelerate
 import einops
 import numpy as np
-from transformers import T5EncoderModel
 import torch
-from tqdm import tqdm
-from PIL import Image
-import accelerate
-from transformers import CLIPTextModel
-from safetensors.torch import load_file
-
 from library import device_utils
-from library.device_utils import init_ipex, get_preferred_device
-from networks import oft_flux
+from library.device_utils import get_preferred_device, init_ipex
 from myCode.modify_model import modify_model
+from networks import oft_flux
+from PIL import Image
+from safetensors.torch import load_file
+from tqdm import tqdm
+from transformers import CLIPTextModel, T5EncoderModel
+
 init_ipex()
 
 
@@ -390,7 +390,7 @@ if __name__ == "__main__":
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/test/test.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux_6_12_18_24_30_36_blockwise/test-000001.safetensors")
     parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/text_encoder/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ae", type=str, default="/export/scratch/sheid/.cache/hub/models--black-forest-labs--FLUX.1-dev/snapshots/0ef5fff789c832c5c7f4e127f94c8b54bbcced44/ae.safetensors")

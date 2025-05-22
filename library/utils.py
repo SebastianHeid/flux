@@ -1,20 +1,23 @@
+import json
 import logging
+import struct
 import sys
 import threading
 from typing import *
-import json
-import struct
 
+import cv2
+import diffusers.schedulers.scheduling_euler_ancestral_discrete
+import numpy as np
 import torch
 import torch.nn as nn
-from torchvision import transforms
 from diffusers import EulerAncestralDiscreteScheduler
-import diffusers.schedulers.scheduling_euler_ancestral_discrete
-from diffusers.schedulers.scheduling_euler_ancestral_discrete import EulerAncestralDiscreteSchedulerOutput
-import cv2
+from diffusers.schedulers.scheduling_euler_ancestral_discrete import (
+    EulerAncestralDiscreteSchedulerOutput,
+)
 from PIL import Image
-import numpy as np
 from safetensors.torch import load_file
+from torchvision import transforms
+
 
 def fire_in_thread(f, *args, **kwargs):
     threading.Thread(target=f, args=args, kwargs=kwargs).start()
@@ -63,7 +66,6 @@ def setup_logging(args=None, log_level=None, reset=False):
         handler = None
         if not args or not args.console_log_simple:
             try:
-                from rich.logging import RichHandler
                 from rich.console import Console
                 from rich.logging import RichHandler
 
@@ -415,6 +417,8 @@ def resize_image(image: np.ndarray, width: int, height: int, resized_width: int,
     """
 
     # Ensure all size parameters are actual integers
+    # print("resized_height: ", resized_height)
+    # print("resized_width: ", resized_width)
     width = int(width)
     height = int(height)
     resized_width = int(resized_width)
@@ -428,12 +432,21 @@ def resize_image(image: np.ndarray, width: int, height: int, resized_width: int,
 
     # we use PIL for lanczos (for backward compatibility) and box, cv2 for others
     use_pil = resize_interpolation in ["lanczos", "lanczos4", "box"]
+    use_correct_aspect_ration = resize_interpolation in ["maintain_aspect_ration"]
 
     resized_size = (resized_width, resized_height)
+    
+    # if resized_width == resized_height:
+    #     transform = transforms.Resize(resized_height)
+    #     torch_image= torch.from_numpy(image)
+    #     image = transform(torch_image)
+    #     image = image.numpy()
+    #     logger.debug(f"resize image using {resize_interpolation} (torchvision)")
     if use_pil:
         interpolation = get_pil_interpolation(resize_interpolation)
         image = pil_resize(image, resized_size, interpolation=interpolation)
         logger.debug(f"resize image using {resize_interpolation} (PIL)")
+        
     else:
         interpolation = get_cv2_interpolation(resize_interpolation)
         image = cv2.resize(image, resized_size, interpolation=interpolation)

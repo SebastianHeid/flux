@@ -3,78 +3,101 @@
 import argparse
 import ast
 import asyncio
-from concurrent.futures import Future, ThreadPoolExecutor
 import datetime
+import glob
+import hashlib
 import importlib
 import json
 import logging
-import pathlib
-import re
-import shutil
-import time
-import typing
-from typing import Any, Callable, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union
-from accelerate import Accelerator, InitProcessGroupKwargs, DistributedDataParallelKwargs, PartialState
-import glob
 import math
 import os
+import pathlib
 import random
-import hashlib
+import re
+import shutil
 import subprocess
+import time
+import typing
+from concurrent.futures import Future, ThreadPoolExecutor
 from io import BytesIO
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+)
+
 import toml
+import torch
+from accelerate import (
+    Accelerator,
+    DistributedDataParallelKwargs,
+    InitProcessGroupKwargs,
+    PartialState,
+)
+from library.device_utils import clean_memory_on_device, init_ipex
+from library.strategy_base import (
+    LatentsCachingStrategy,
+    TextEncoderOutputsCachingStrategy,
+    TextEncodingStrategy,
+    TokenizeStrategy,
+)
+from packaging.version import Version
+from tqdm import tqdm
 
 # from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from tqdm import tqdm
-from packaging.version import Version
 
-import torch
-from library.device_utils import init_ipex, clean_memory_on_device
-from library.strategy_base import LatentsCachingStrategy, TokenizeStrategy, TextEncoderOutputsCachingStrategy, TextEncodingStrategy
 
 init_ipex()
 
+import cv2
+import imagesize
+import library.deepspeed_utils as deepspeed_utils
+import library.huggingface_util as huggingface_util
+import library.model_util as model_util
+import library.sai_model_spec as sai_model_spec
+import numpy as np
+import safetensors.torch
+import transformers
+from diffusers import (
+    AutoencoderKL,
+    DDIMScheduler,
+    DDPMScheduler,
+    DPMSolverMultistepScheduler,
+    DPMSolverSinglestepScheduler,
+    EulerAncestralDiscreteScheduler,
+    EulerDiscreteScheduler,
+    HeunDiscreteScheduler,
+    KDPM2AncestralDiscreteScheduler,
+    KDPM2DiscreteScheduler,
+    LMSDiscreteScheduler,
+    PNDMScheduler,
+    StableDiffusionPipeline,
+)
+from diffusers.optimization import (
+    TYPE_TO_SCHEDULER_FUNCTION as DIFFUSERS_TYPE_TO_SCHEDULER_FUNCTION,
+)
+from diffusers.optimization import SchedulerType as DiffusersSchedulerType
+from huggingface_hub import hf_hub_download
+from library import custom_train_functions, sd3_utils
+from library.lpw_stable_diffusion import StableDiffusionLongPromptWeightingPipeline
+from library.original_unet import UNet2DConditionModel
+from library.sdxl_lpw_stable_diffusion import (
+    SdxlStableDiffusionLongPromptWeightingPipeline,
+)
+from library.utils import resize_image, setup_logging, validate_interpolation_fn
+from PIL import Image
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.optim import Optimizer
 from torchvision import transforms
-from transformers import CLIPTokenizer, CLIPTextModel, CLIPTextModelWithProjection
-import transformers
-from diffusers.optimization import (
-    SchedulerType as DiffusersSchedulerType,
-    TYPE_TO_SCHEDULER_FUNCTION as DIFFUSERS_TYPE_TO_SCHEDULER_FUNCTION,
-)
-from transformers.optimization import SchedulerType, TYPE_TO_SCHEDULER_FUNCTION
-from diffusers import (
-    StableDiffusionPipeline,
-    DDPMScheduler,
-    EulerAncestralDiscreteScheduler,
-    DPMSolverMultistepScheduler,
-    DPMSolverSinglestepScheduler,
-    LMSDiscreteScheduler,
-    PNDMScheduler,
-    DDIMScheduler,
-    EulerDiscreteScheduler,
-    HeunDiscreteScheduler,
-    KDPM2DiscreteScheduler,
-    KDPM2AncestralDiscreteScheduler,
-    AutoencoderKL,
-)
-from library import custom_train_functions, sd3_utils
-from library.original_unet import UNet2DConditionModel
-from huggingface_hub import hf_hub_download
-import numpy as np
-from PIL import Image
-import imagesize
-import cv2
-import safetensors.torch
-from library.lpw_stable_diffusion import StableDiffusionLongPromptWeightingPipeline
-from library.sdxl_lpw_stable_diffusion import SdxlStableDiffusionLongPromptWeightingPipeline
-import library.model_util as model_util
-import library.huggingface_util as huggingface_util
-import library.sai_model_spec as sai_model_spec
-import library.deepspeed_utils as deepspeed_utils
-from library.utils import setup_logging, resize_image, validate_interpolation_fn
+from transformers import CLIPTextModel, CLIPTextModelWithProjection, CLIPTokenizer
+from transformers.optimization import TYPE_TO_SCHEDULER_FUNCTION, SchedulerType
 
 setup_logging()
 import logging
@@ -2951,13 +2974,14 @@ def load_image(image_path, alpha=False):
 def trim_and_resize_if_required(
     random_crop: bool, image: np.ndarray, reso, resized_size: Tuple[int, int], resize_interpolation: Optional[str] = None
 ) -> Tuple[np.ndarray, Tuple[int, int], Tuple[int, int, int, int]]:
-    
+    #print("resized size: "), resized_size
+    #print("reso: ", reso)    
     image_height, image_width = image.shape[0:2]
     original_size = (image_width, image_height)  # size before resize
 
     if image_width != resized_size[0] or image_height != resized_size[1]:
         image = resize_image(image, image_width, image_height, resized_size[0], resized_size[1], resize_interpolation)
-
+    #print("Image before cropping: ", image.shape)
     image_height, image_width = image.shape[0:2]
 
     if image_width > reso[0]:
@@ -2970,6 +2994,7 @@ def trim_and_resize_if_required(
         p = trim_size // 2 if not random_crop else random.randint(0, trim_size)
         # logger.info(f"h {trim_size} {p})
         image = image[p : p + reso[1]]
+        #print("Image after cropping: ",image.shape)
 
     # random cropの場合のcropされた値をどうcrop left/topに反映するべきか全くアイデアがない
     # I have no idea how to reflect the cropped value in crop left/top in the case of random crop
@@ -3542,6 +3567,12 @@ def add_sd_models_arguments(parser: argparse.ArgumentParser):
         type=str,
         default=None,
         help="directory for caching Tokenizer (for offline training) / Tokenizerをキャッシュするディレクトリ（ネット接続なしでの学習のため）",
+    )
+    parser.add_argument(
+        "--pretrained_ref_model_name_or_path",
+        type=str,
+        default=None,
+        help="pretrained ref model to train, directory to Diffusers model or StableDiffusion checkpoint / 学習元モデル、Diffusers形式モデルのディレクトリまたはStableDiffusionのckptファイル",
     )
 
 
@@ -4603,6 +4634,21 @@ def add_sd_saving_arguments(parser: argparse.ArgumentParser):
         action="store_true",
         help="use safetensors format to save (if save_model_as is not specified) / checkpoint、モデルをsafetensors形式で保存する（save_model_as未指定時）",
     )
+
+
+def add_KD_arguments(parser: argparse.ArgumentParser):
+    parser.add_argument("--KD_flag", action="store_true", help="Set it if knowledge distillation should be performed.")
+    parser.add_argument("--remove_single_blocks", nargs="+", type=int, default=[], help="Specify which single blocks are removed from the flux architecutre. 0-37")
+    parser.add_argument("--remove_double_blocks", nargs="+", type=int, default=[], help="Specify which double blocks are removed from the flux architecutre. 0-18")
+    parser.add_argument("--trainable_single_blocks", nargs="+", type=int, default=[], help="Specify which single blocks are set trainable. 0-37")
+    parser.add_argument("--trainable_double_blocks", nargs="+", type=int, default=[], help="Specify which double blocks are set trainable. 0-18")
+    parser.add_argument("--partially_trainable_model", action="store_true", help="If the total model is trainable")
+    parser.add_argument("--feature_loss_flag", action="store_true", help="If features should be used for loss calculation")
+    parser.add_argument("--final_loss_flag", action="store_true", help="If final output between teacher and student should be used for loss calculation")
+    parser.add_argument("--original_loss_flag", action="store_true", help="If original diffusion loss  should be used for loss calculation")
+    parser.add_argument("--single_feature_loss_list", nargs="+", type=int, default=[], help="List of single blocks after which features should be used for loss calculation")
+    parser.add_argument("--double_feature_loss_list", nargs="+", type=int, default=[], help="List of double blocks after which features should be used for loss calculation")
+    parser.add_argument("--pre_block_gpu", action="store_true", help="Block gpu memeory so that others can see that a training was started and do not also start another training.")
 
 
 def read_config_from_file(args: argparse.Namespace, parser: argparse.ArgumentParser):
