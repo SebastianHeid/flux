@@ -6,11 +6,9 @@ from typing import Any, Optional, Union
 
 import torch
 from accelerate import Accelerator
-
 from library.device_utils import clean_memory_on_device, init_ipex
 
 init_ipex()
-
 import train_network
 from library import (
     flux_models,
@@ -22,6 +20,7 @@ from library import (
     train_util,
 )
 from library.utils import setup_logging
+from myCode.modify_model import modify_model
 
 setup_logging()
 import logging
@@ -98,6 +97,14 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
         self.is_schnell, model = flux_utils.load_flow_model(
             args.pretrained_model_name_or_path, loading_dtype, "cpu", disable_mmap=args.disable_mmap_load_safetensors
         )
+        if args.KD_flag:
+            _, ref_flux = flux_utils.load_flow_model(
+                args.pretrained_ref_model_name_or_path, weight_dtype, "cpu", args.disable_mmap_load_safetensors
+            )
+            ref_flux.requires_grad_(False)
+        
+        
+        model = modify_model(model, args.remove_double_blocks, args.remove_single_blocks)
         if args.fp8_base:
             # check dtype of model
             if model.dtype == torch.float8_e4m3fnuz or model.dtype == torch.float8_e5m2 or model.dtype == torch.float8_e5m2fnuz:
@@ -111,14 +118,28 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
                 )
                 model.to(torch.float8_e4m3fn)
 
+        if args.fp8_base and args.KD_flag:
+            # check dtype of model
+            if ref_flux.dtype == torch.float8_e4m3fnuz or ref_flux.dtype == torch.float8_e5m2 or ref_flux.dtype == torch.float8_e5m2fnuz:
+                raise ValueError(f"Unsupported fp8 model dtype: {ref_flux.dtype}")
+            elif ref_flux.dtype == torch.float8_e4m3fn:
+                logger.info("Loaded fp8 FLUX model")
+            else:
+                logger.info(
+                    "Cast FLUX model to fp8. This may take a while. You can reduce the time by using fp8 checkpoint."
+                    " / FLUXモデルをfp8に変換しています。これには時間がかかる場合があります。fp8チェックポイントを使用することで時間を短縮できます。"
+                )
+                ref_flux.to(torch.float8_e4m3fn)
+                
         # if args.split_mode:
         #     model = self.prepare_split_model(model, weight_dtype, accelerator)
-
         self.is_swapping_blocks = args.blocks_to_swap is not None and args.blocks_to_swap > 0
         if self.is_swapping_blocks:
             # Swap blocks between CPU and GPU to reduce memory usage, in forward and backward passes.
             logger.info(f"enable block swap: blocks_to_swap={args.blocks_to_swap}")
             model.enable_block_swap(args.blocks_to_swap, accelerator.device)
+            if args.KD_flag:
+                ref_flux.enable_block_swap(args.blocks_to_swap, accelerator.device)
 
         clip_l = flux_utils.load_clip_l(args.clip_l, weight_dtype, "cpu", disable_mmap=args.disable_mmap_load_safetensors)
         clip_l.eval()
@@ -141,7 +162,10 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
 
         ae = flux_utils.load_ae(args.ae, weight_dtype, "cpu", disable_mmap=args.disable_mmap_load_safetensors)
 
-        return flux_utils.MODEL_VERSION_FLUX_V1, [clip_l, t5xxl], ae, model
+        if args.KD_flag:
+            return flux_utils.MODEL_VERSION_FLUX_V1, [clip_l, t5xxl], ae, model, ref_flux
+        else: 
+            return flux_utils.MODEL_VERSION_FLUX_V1, [clip_l, t5xxl], ae, model, None
 
     def get_tokenize_strategy(self, args):
         _, is_schnell, _, _ = flux_utils.analyze_checkpoint_state(args.pretrained_model_name_or_path)
@@ -384,7 +408,8 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
             # grad is enabled even if unet is not in train mode, because Text Encoder is in train mode
             with torch.set_grad_enabled(is_train), accelerator.autocast():
                 # YiYi notes: divide it by 1000 for now because we scale it by 1000 in the transformer model (we should not keep it but I want to keep the inputs same for the model for testing)
-                model_pred = unet(
+                if args.KD_flag:
+                    model_pred, feat_double, feat_single = unet(
                     img=img,
                     img_ids=img_ids,
                     txt=t5_out,
@@ -393,10 +418,24 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
                     timesteps=timesteps / 1000,
                     guidance=guidance_vec,
                     txt_attention_mask=t5_attn_mask,
+                    KD_flag=args.KD_flag
                 )
+                    return model_pred, feat_double, feat_single
+                else:
+                    model_pred,_,_ = unet(
+                        img=img,
+                        img_ids=img_ids,
+                        txt=t5_out,
+                        txt_ids=txt_ids,
+                        y=l_pooled,
+                        timesteps=timesteps / 1000,
+                        guidance=guidance_vec,
+                        txt_attention_mask=t5_attn_mask,
+                    )
             return model_pred
 
-        model_pred = call_dit(
+        if args.KD_flag:
+            model_pred, feat_double, feat_single = call_dit(
             img=packed_noisy_model_input,
             img_ids=img_ids,
             t5_out=t5_out,
@@ -406,6 +445,17 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
             guidance_vec=guidance_vec,
             t5_attn_mask=t5_attn_mask,
         )
+        else:
+            model_pred = call_dit(
+                img=packed_noisy_model_input,
+                img_ids=img_ids,
+                t5_out=t5_out,
+                txt_ids=txt_ids,
+                l_pooled=l_pooled,
+                timesteps=timesteps,
+                guidance_vec=guidance_vec,
+                t5_attn_mask=t5_attn_mask,
+            )
 
         # unpack latents
         model_pred = flux_utils.unpack_latents(model_pred, packed_latent_height, packed_latent_width)
@@ -448,7 +498,10 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
                 )
                 target[diff_output_pr_indices] = model_pred_prior.to(target.dtype)
 
-        return model_pred, target, timesteps, weighting
+        if args.KD_flag:
+            return model_pred, target, timesteps, weighting, feat_double, feat_single
+        else:
+            return model_pred, target, timesteps, weighting, None, None
 
     def post_process_loss(self, loss, args, timesteps, noise_scheduler):
         return loss
@@ -525,6 +578,7 @@ class FluxNetworkTrainer(train_network.NetworkTrainer):
 
         # if we doesn't swap blocks, we can move the model to device
         flux: flux_models.Flux = unet
+        flux = modify_model(flux, args.remove_double_blocks, args.remove_single_blocks)
         flux = accelerator.prepare(flux, device_placement=[not self.is_swapping_blocks])
         accelerator.unwrap_model(flux).move_to_device_except_swap_blocks(accelerator.device)  # reduce peak memory usage
         accelerator.unwrap_model(flux).prepare_block_swap_before_forward()
@@ -550,7 +604,7 @@ def setup_parser() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     parser = setup_parser()
-
+    train_util.add_KD_arguments(parser)
     args = parser.parse_args()
     train_util.verify_command_line_training_args(args)
     args = train_util.read_config_from_file(args, parser)

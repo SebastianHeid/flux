@@ -24,9 +24,21 @@ class Identity(nn.Module):
     def forward(self, x, *args, **kargs):
         return x
     
+    def enable_gradient_checkpointing(self,cpu_offload=False):
+        self.gradient_checkpointing = True
+
+    def disable_gradient_checkpointing(self, cpu_offload=False):
+        self.gradient_checkpointing = False
+    
 class IdentityD(nn.Module):
     def __init__(self, hidden_size, mlp_ratio, num_heads):
         super().__init__()
 
     def forward(self, img, txt, vec, pe, txt_attention_mask= None):
         return img, txt
+    
+    def enable_gradient_checkpointing(self,cpu_offload=False):
+        self.gradient_checkpointing = True
+
+    def disable_gradient_checkpointing(self, cpu_offload=False):
+        self.gradient_checkpointing = False

@@ -1,25 +1,24 @@
 import argparse
+import json
 import math
 import os
-import numpy as np
-import toml
-import json
 import time
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
+import toml
 import torch
 from accelerate import Accelerator, PartialState
-from transformers import CLIPTextModel
-from tqdm import tqdm
+from library import flux_models, flux_utils, strategy_base, train_util
+from library.device_utils import clean_memory_on_device, init_ipex
 from PIL import Image
 from safetensors.torch import save_file
-
-from library import flux_models, flux_utils, strategy_base, train_util
-from library.device_utils import init_ipex, clean_memory_on_device
+from tqdm import tqdm
+from transformers import CLIPTextModel
 
 init_ipex()
 
-from .utils import setup_logging, mem_eff_save_file
+from .utils import mem_eff_save_file, setup_logging
 
 setup_logging()
 import logging
@@ -383,7 +382,7 @@ def denoise(
                 guidance=guidance_vec,
                 txt_attention_mask=t5_attn_mask,
             )
-
+     
             img = img + (t_prev - t_curr) * pred
         else:
             cfg_scale, neg_l_pooled, neg_t5_out, neg_t5_attn_mask = neg_cond

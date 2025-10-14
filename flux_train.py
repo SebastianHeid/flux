@@ -10,7 +10,7 @@ import copy
 import gc
 import math
 import os
-
+import sys 
 # Key features:
 # - CPU offloading during forward and backward passes
 # - Use of fused optimizer and grad_hook for efficient gradient processing
@@ -412,10 +412,16 @@ def train(args):
         for block_num in args.trainable_single_blocks:
             for param in flux.single_blocks[block_num].parameters():
                 param.requires_grad = True
+       
         for block_num in args.trainable_double_blocks:
             for param in flux.double_blocks[block_num].parameters():
                 param.requires_grad = True
-        
+
+    if args.freeze_double_blocks:
+        for block_num in range(len(flux.double_blocks)):
+            for param in flux.double_blocks[block_num].parameters():
+                param.requires_grad = False
+
     # laod reference FLUX if KD True
     if args.KD_flag:
         _, ref_flux = flux_utils.load_flow_model(
@@ -711,10 +717,6 @@ def train(args):
 
     if accelerator.is_main_process:
         init_kwargs = {}
-        print("-----------------------------------")
-        print("--------------------------------")
-        print("-----------------------------------")
-        print(args.wandb_run_name)
         if args.wandb_run_name:
             init_kwargs["wandb"] = {"name": args.wandb_run_name}
         if args.log_tracker_config is not None:
@@ -864,15 +866,14 @@ def train(args):
                     huber_c = train_util.get_huber_threshold_if_needed(args, timesteps, noise_scheduler)
                     if args.final_loss_flag:
                         l = train_util.conditional_loss(model_pred.float(), ref_model_pred.float(), args.loss_type, "none", huber_c)
-                        l = l.mean([1,2,3])
-                        loss += l
+                        l_final = l.mean([1,2,3])
+                        loss += args.final_loss_weighting * l_final
                     if args.original_loss_flag:
                         target = noise - latents
                         l =  train_util.conditional_loss(model_pred.float(), target.float(), args.loss_type, "none", huber_c)
-                        l = l.mean([1,2,3])
-                        loss +=l
+                        l_org = l.mean([1,2,3])
+                        loss += args.original_loss_weighting * l_org
                     if args.feature_loss_flag:
-                        
                         single_block_loss = []
                         for idx in args.single_feature_loss_list:
                             l = train_util.conditional_loss(single_block_features[idx].float(), ref_single_block_features[idx].float(), args.loss_type, "none", huber_c)
@@ -881,7 +882,7 @@ def train(args):
                         if not len(single_block_loss)==0:
                             single_block_loss=torch.stack(single_block_loss,dim=0)
                             single_block_loss = normalization_feature_loss(single_block_loss)
-                            loss += single_block_loss.mean(0)
+                            loss += args.single_loss_weighting * single_block_loss.mean(0)
                         
                         double_block_loss = []
                         for idx in args.double_feature_loss_list:
@@ -891,7 +892,7 @@ def train(args):
                         if not len(double_block_loss)==0:
                             double_block_loss=torch.stack(double_block_loss,dim=0)
                             double_block_loss = normalization_feature_loss(double_block_loss)
-                            loss += double_block_loss.mean(0)
+                            loss += args.double_loss_weighting * double_block_loss.mean(0)
                     loss = loss.mean()
                         
                 
@@ -957,11 +958,24 @@ def train(args):
                             global_step,
                             accelerator.unwrap_model(flux),
                         )
+                    sys.exit()
+                    
                 optimizer_train_fn()
 
             current_loss = loss.detach().item()  # 平均なのでbatch sizeは関係ないはず
             if len(accelerator.trackers) > 0:
                 logs = {"loss": current_loss}
+                # if args.final_loss_flag:
+                #     logs["final_loss"] = l_final.detach().item()
+                # if args.original_loss_flag:
+                #     logs["org_loss"] = l_org.detach().item()
+                # if args.feature_loss_flag:
+                #     if not len(single_block_loss)==0:
+                #         logs["single_loss"] = single_block_loss.mean(0).detach().item()
+                #     if not len(double_block_loss)==0:
+                #         logs["double_loss"] = double_block_loss.mean(0).detach().item()
+                    
+                        
                 train_util.append_lr_to_logs(logs, lr_scheduler, args.optimizer_type, including_unet=True)
 
                 accelerator.log(logs, step=global_step)

@@ -6,9 +6,11 @@ import math
 import os
 import random
 from typing import Callable, List, Optional
-import json 
+import yaml 
+from box import Box
 import accelerate
 import einops
+from torch.utils.data import DataLoader 
 import numpy as np
 import torch
 from library import device_utils
@@ -19,7 +21,9 @@ from PIL import Image
 from safetensors.torch import load_file
 from tqdm import tqdm
 from transformers import CLIPTextModel, T5EncoderModel
-
+import sys
+sys.path.append("/export/home/sheid/MasterThesis_Evaluation/datasets")
+from eval_dataset import PromptFolderDataset
 init_ipex()
 
 
@@ -32,6 +36,73 @@ logger = logging.getLogger(__name__)
 
 import networks.lora_flux as lora_flux
 from library import flux_models, flux_utils, sd3_utils, strategy_flux
+
+
+def best_network(idx, cmmd_single, lpips_single, cmmd_double, lpips_double, single_blocks, double_blocks):
+    if cmmd_double:
+        double_total_position = {}
+        double_position_cmmd = {}
+        double_position_lpips = {}
+        sorted_cmmd_double  = sorted(cmmd_double.items(), key=lambda item: item[1])
+        sorted_lpips_double = sorted(lpips_double.items(), key=lambda item: item[1])
+        
+        for idx, (key, _) in enumerate(sorted_cmmd_double):
+            double_position_cmmd[key] = idx
+        for idx, (key, _) in enumerate(sorted_lpips_double):
+            double_position_lpips[key] = idx
+        
+        for key in double_position_cmmd:
+            double_total_position[key] = double_position_cmmd[key]+double_position_lpips[key] 
+        double_best_block = min(double_total_position, key=double_total_position.get)
+    
+    if cmmd_single:
+        single_total_position = {}
+        single_position_cmmd = {}
+        single_position_lpips = {}
+        
+        sorted_cmmd_single = sorted(cmmd_single.items(), key=lambda item: item[1])
+        sorted_lpips_single = sorted(lpips_single.items(), key=lambda item: item[1])
+        
+        for idx, (key, _) in enumerate(sorted_cmmd_single):
+            single_position_cmmd[key] = idx
+        for idx, (key, _) in enumerate(sorted_lpips_single):
+            single_position_lpips[key] = idx
+            
+        for key in single_position_cmmd:
+            single_total_position[key] = single_position_cmmd[key]+single_position_lpips[key] 
+        single_best_block = min(single_total_position, key=single_total_position.get)
+    
+    
+    if not cmmd_double:
+        best_block = single_best_block
+        block_type = "single"
+    elif not cmmd_single:
+        best_block = double_best_block
+        block_type = "double"
+    elif  min(single_total_position.values()) <= min(double_total_position.values()):
+        best_block = single_best_block
+        block_type = "single"
+    else:
+        best_block = double_best_block
+        block_type = "double"
+
+    
+    with open("./block_analysis/results.txt", "a") as f: 
+        f.write(str(idx) + ". block removed from "+str(block_type) + " blocks \n")
+        f.write("Best block: " + str(best_block) + "\n")
+        
+        if cmmd_single:
+            for i in range(len(single_blocks)):
+                f.write("Block: " + str(single_blocks[i]) + " LPIPS: " + str(lpips_single[single_blocks[i]]) + " CMMD: " + str(cmmd_single[single_blocks[i]]) + " total position: " +str(single_total_position[single_blocks[i]]) + "\n")
+        if cmmd_double:
+            for i in range(len(double_blocks)):
+                f.write("Block: " + str(double_blocks[i]) + " LPIPS: " + str(lpips_double[double_blocks[i]]) + " CMMD: " + str(cmmd_double[double_blocks[i]]) + " total position: " +str(double_total_position[double_blocks[i]]) + "\n")
+        
+        f.write("\n")
+        f.write("\n")
+    return best_block, block_type
+    
+
 
 
 def time_shift(mu: float, sigma: float, t: torch.Tensor):
@@ -195,6 +266,7 @@ def generate_image(
     clip_l: CLIPTextModel,
     t5xxl,
     ae,
+    config,
     prompt: str,
     seed: Optional[int],
     image_width: int,
@@ -203,8 +275,6 @@ def generate_image(
     guidance: float,
     negative_prompt: Optional[str],
     cfg_scale: float,
-    idx: int,
-    prompt_name: str = None,
 ):
     seed = seed if seed is not None else random.randint(0, 2**32 - 1)
     logger.info(f"Seed: {seed}")
@@ -285,12 +355,12 @@ def generate_image(
             if is_fp8(t5xxl_dtype):
                 with accelerator.autocast():
                     _, t5_out, txt_ids, t5_attn_mask = encoding_strategy.encode_tokens(
-                        tokenize_strategy, [clip_l, t5xxl], tokens_and_masks, args.apply_t5_attn_mask
+                        tokenize_strategy, [clip_l, t5xxl], tokens_and_masks, config.apply_t5_attn_mask
                     )
             else:
                 with torch.autocast(device_type=device.type, dtype=t5xxl_dtype):
                     _, t5_out, txt_ids, t5_attn_mask = encoding_strategy.encode_tokens(
-                        tokenize_strategy, [None, t5xxl], tokens_and_masks, args.apply_t5_attn_mask
+                        tokenize_strategy, [None, t5xxl], tokens_and_masks, config.apply_t5_attn_mask
                     )
         return l_pooled, t5_out, txt_ids, t5_attn_mask
 
@@ -306,7 +376,7 @@ def generate_image(
     if torch.isnan(t5_out).any():
         raise ValueError("NaN in t5_out")
 
-    if args.offload:
+    if config.offload:
         clip_l = clip_l.cpu()
         t5xxl = t5xxl.cpu()
     # del clip_l, t5xxl
@@ -314,18 +384,12 @@ def generate_image(
 
     # generate image
     logger.info("Generating image...")
-    #model = model.to(device)
-    # Check if model has meta tensors
-    if any(param.is_meta for param in model.parameters()):
-        model = model.to_empty(device=device)
-    else:
-        model = model.to(device)
-    
+    model = model.to(device)
     if steps is None:
         steps = 4 if is_schnell else 50
 
     img_ids = img_ids.to(device)
-    t5_attn_mask = t5_attn_mask.to(device) if args.apply_t5_attn_mask else None
+    t5_attn_mask = t5_attn_mask.to(device) if config.apply_t5_attn_mask else None
 
     x = do_sample(
         accelerator,
@@ -346,7 +410,7 @@ def generate_image(
         neg_t5_attn_mask,
         cfg_scale,
     )
-    if args.offload:
+    if config.offload:
         model = model.cpu()
     # del model
     device_utils.clean_memory()
@@ -365,7 +429,7 @@ def generate_image(
         else:
             with torch.autocast(device_type=device.type, dtype=ae_dtype):
                 x = ae.decode(x)
-    if args.offload:
+    if config.offload:
         ae = ae.cpu()
 
     x = x.clamp(-1, 1)
@@ -373,271 +437,218 @@ def generate_image(
     img = Image.fromarray((127.5 * (x + 1.0)).float().cpu().numpy().astype(np.uint8)[0])
 
     # save image
-    output_dir = args.output_dir
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = config.output_dir
     #output_path = os.path.join(output_dir, f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-    output_path = os.path.join(output_dir, str(idx) + "_" + args.image_name )
-    #output_path = os.path.join(output_dir, prompt_name + ".png" )
+    output_path = os.path.join(output_dir)
     img.save(output_path)
 
     logger.info(f"Saved image to {output_path}")
 
 
+def get_parser(**parser_kwargs):
+    parser = argparse.ArgumentParser(**parser_kwargs)
+    parser.add_argument(
+        "--config_path",
+        type=str,
+        const=True,
+        default="/home/hd/hd_hd/hd_om233/flux/block_analysis_config/config.yaml",
+        nargs="?",
+        help="Path to config.yaml file",
+    )
+    return parser
+
+
 if __name__ == "__main__":
-    target_height = 1024  # 1024
-    target_width = 1024  # 1024
+    target_height = 512  # 1024
+    target_width = 512  # 1024
 
     # steps = 50  # 28  # 50
     # guidance_scale = 5
     # seed = 1  # None  # 1
 
     device = get_preferred_device()
-
-    parser = argparse.ArgumentParser()
-    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux/transformer/transformer.safetensors")
-    # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
-    # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
-    #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
-    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
-    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
-    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
-    parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--prompt", type=str, default=" A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.")
-    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
-    parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
-    parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
-    parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
-    parser.add_argument("--t5xxl_dtype", type=str, default=None, help="dtype for t5xxl")
-    parser.add_argument("--flux_dtype", type=str, default=None, help="dtype for flux")
-    parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--steps", type=int, default=None, help="Number of steps. Default is 4 for schnell, 50 for dev")
-    parser.add_argument("--guidance", type=float, default=3.5)
-    parser.add_argument("--negative_prompt", type=str, default=None)
-    parser.add_argument("--cfg_scale", type=float, default=1.0)
-    parser.add_argument("--offload", action="store_true", help="Offload to CPU")
-    parser.add_argument(
-        "--lora_weights",
-        type=str,
-        nargs="*",
-        default=[],
-        help="LoRA weights, only supports networks.lora_flux and lora_oft, each argument is a `path;multiplier` (semi-colon separated)",
-    )
-    parser.add_argument("--merge_lora_weights", action="store_true", help="Merge LoRA weights to model")
-    parser.add_argument("--width", type=int, default=target_width)
-    parser.add_argument("--height", type=int, default=target_height)
-    parser.add_argument("--interactive", action="store_true")
-    parser.add_argument("--double_blocks", nargs='+', type=int, default=[13,14,10])
-    parser.add_argument("--single_blocks", nargs='+', type=int, default=[3, 21, 22, 24, 28, 0, 1, 19, 20, 33,10,12,15,18,23,25])
-    # parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
-    # parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
-    parser.add_argument("--image_name", type=str, default="img.png")
+    
+    parser = get_parser()
     args = parser.parse_args()
-  
-
-    prompts = [
-    "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
-    "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
-    "A dynamic action shot of a cheetah chasing its prey across a vast African savanna at sunset, with dust kicking up and a blur of motion.",
-    "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background."
-]
-
-    prompts = ["Stylized portrait of a blonde paladin, in the Anna Podedworna style.",
-              "A photo of a purple sheep and a pink banana.",
-              "A photo of a sandwich.",
-              "Oil portrait of a young black woman wearing a wildflower crown in golden light."]
+    with open(args.config_path, "r") as file:
+        config = Box(yaml.safe_load(file))
     
+    seed = config.seed
+    guidance_scale = config.guidance
+    steps = config.steps
     
-    # with open("/home/hd/hd_hd/hd_om233/partially_removal/MasterThesis_Evaluation/data_info_val_1k.json", "r") as file:
-    #     prompts = json.load(file)
-        
-    #prompts = []
-    # for d in data.values():
-    #     prompts.append(d)
-    
-    print(len(prompts))
-    seed = args.seed
-    steps = args.steps
-    guidance_scale = args.guidance
 
     def is_fp8(dt):
         return dt in [torch.float8_e4m3fn, torch.float8_e4m3fnuz, torch.float8_e5m2, torch.float8_e5m2fnuz]
 
-    dtype = str_to_dtype(args.dtype)
-    clip_l_dtype = str_to_dtype(args.clip_l_dtype, dtype)
-    t5xxl_dtype = str_to_dtype(args.t5xxl_dtype, dtype)
-    ae_dtype = str_to_dtype(args.ae_dtype, dtype)
-    flux_dtype = str_to_dtype(args.flux_dtype, dtype)
+    dtype = str_to_dtype(config.dtype)
+    clip_l_dtype = str_to_dtype(config.clip_l_dtype, dtype)
+    t5xxl_dtype = str_to_dtype(config.t5xxl_dtype, dtype)
+    ae_dtype = str_to_dtype(config.ae_dtype, dtype)
+    flux_dtype = str_to_dtype(config.flux_dtype, dtype)
 
     logger.info(f"Dtypes for clip_l, t5xxl, ae, flux: {clip_l_dtype}, {t5xxl_dtype}, {ae_dtype}, {flux_dtype}")
 
-    loading_device = "cpu" if args.offload else device
+    loading_device = "cpu" if config.offload else device
 
     use_fp8 = [is_fp8(d) for d in [dtype, clip_l_dtype, t5xxl_dtype, ae_dtype, flux_dtype]]
     if any(use_fp8):
         accelerator = accelerate.Accelerator(mixed_precision="bf16")
     else:
         accelerator = None
-        
-        
-    print(loading_device)
-    is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
-    model.eval()
-    logger.info(f"Casting model to {flux_dtype}")
-    model.to(flux_dtype)  # make sure model is dtype
-    print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    model = modify_model(model, args.double_blocks, args.single_blocks)
-    for name, param in model.named_parameters():
-        if param.is_meta:
-            print(f"Meta tensor found: {name}")
-  
-    print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    
-    
-    
 
-    logger.info(f"Loading t5xxl from {args.t5xxl}...")
-    t5xxl = flux_utils.load_t5xxl(args.t5xxl, t5xxl_dtype, loading_device)
-    #t5xxl = T5EncoderModel.from_pretrained("google/t5-v1_1-xxl")
+    logger.info(f"Loading t5xxl from {config.t5xxl}...")
+    t5xxl = flux_utils.load_t5xxl(config.t5xxl, t5xxl_dtype, loading_device)
     t5xxl.eval()
     
     # load clip_l
-    logger.info(f"Loading clip_l from {args.clip_l}...")
-    clip_l = flux_utils.load_clip_l(args.clip_l, clip_l_dtype, loading_device)
+    logger.info(f"Loading clip_l from {config.clip_l}...")
+    clip_l = flux_utils.load_clip_l(config.clip_l, clip_l_dtype, loading_device)
     clip_l.eval()
 
-    
-
-    # if is_fp8(clip_l_dtype):
-    #     clip_l = accelerator.prepare(clip_l)
-    # if is_fp8(t5xxl_dtype):
-    #     t5xxl = accelerator.prepare(t5xxl)
-
-    # DiT
-    # is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
-    # model.eval()
-    # logger.info(f"Casting model to {flux_dtype}")
-    # model.to(flux_dtype)  # make sure model is dtype
-    # if is_fp8(flux_dtype):
-    #     model = accelerator.prepare(model)
-    #     if args.offload:
-    #         model = model.to("cpu")
-
-    t5xxl_max_length = 256 if is_schnell else 512
+    t5xxl_max_length = 512
     tokenize_strategy = strategy_flux.FluxTokenizeStrategy(t5xxl_max_length)
     encoding_strategy = strategy_flux.FluxTextEncodingStrategy()
 
     # AE
-    ae = flux_utils.load_ae(args.ae, ae_dtype, loading_device)
+    ae = flux_utils.load_ae(config.ae, ae_dtype, loading_device)
     ae.eval()
-    # if is_fp8(ae_dtype):
-    #     ae = accelerator.prepare(ae)
-
-    # LoRA
-    lora_models: List[lora_flux.LoRANetwork] = []
-    for weights_file in args.lora_weights:
-        if ";" in weights_file:
-            weights_file, multiplier = weights_file.split(";")
-            multiplier = float(multiplier)
-        else:
-            multiplier = 1.0
-
-        weights_sd = load_file(weights_file)
-        is_lora = is_oft = False
-        for key in weights_sd.keys():
-            if key.startswith("lora"):
-                is_lora = True
-            if key.startswith("oft"):
-                is_oft = True
-            if is_lora or is_oft:
-                break
-
-        module = lora_flux if is_lora else oft_flux
-        lora_model, _ = module.create_network_from_weights(multiplier, None, ae, [clip_l, t5xxl], model, weights_sd, True)
-
-        if args.merge_lora_weights:
-            lora_model.merge_to([clip_l, t5xxl], model, weights_sd)
-        else:
-            lora_model.apply_to([clip_l, t5xxl], model)
-            info = lora_model.load_state_dict(weights_sd, strict=True)
-            logger.info(f"Loaded LoRA weights from {weights_file}: {info}")
-            lora_model.eval()
-            lora_model.to(device)
-
-        lora_models.append(lora_model)
-
-    if not args.interactive:
-        #for idx, (prompt_name,  prompt) in enumerate(prompts.items()):
-        for idx, prompt in enumerate(prompts):
+    
+    with open(config.prompt_path, "r") as file:
+        prompts = file.readlines()
+    prompts = [prompt.strip() for prompt in prompts]  # Remove empty lines
+    
+    single_blocks = np.linspace(0,37, num=38, dtype=int)
+    double_blocks = np.linspace(0,18, num=19, dtype=int)
+    removed_single_blocks = []
+    removed_double_blocks = []
+    
+    # paths
+    ref_path = config.generated_images_path + "/original"
+    single_path = config.generated_images_path + "/single_block"
+    double_path = config.generated_images_path + "/double_block"
+    
+    # compute original images
+    config.double_blocks = []
+    config.single_blocks = []
+   
+    is_schnell, model = flux_utils.load_flow_model(config.ckpt_path, None, loading_device)
+    model.eval()
+    logger.info(f"Casting model to {flux_dtype}")
+    model.to(flux_dtype)  # make sure model is dtype
+    for prompt_idx, prompt in enumerate(prompts):
+            config.output_dir = ref_path  + "/prompt_"+ str(prompt_idx) + ".png"
+            if not os.path.exists(ref_path):
+                os.makedirs(ref_path)
             generate_image(
                 model,
                 clip_l,
                 t5xxl,
                 ae,
+                config, 
                 prompt,
-                args.seed,
-                args.width,
-                args.height,
-                args.steps,
-                args.guidance,
-                args.negative_prompt,
-                args.cfg_scale,
-                idx,
-              #  prompt_name = prompt_name
-              prompt_name="image"
+                config.seed,
+                config.width,
+                config.height,
+                config.steps,
+                config.guidance,
+                config.negative_prompt,
+                config.cfg_scale,
             )
-    else:
-        # loop for interactive
-        width = target_width
-        height = target_height
-        steps = None
-        guidance = args.guidance
-        cfg_scale = args.cfg_scale
-
-        while True:
-            print(
-                "Enter prompt (empty to exit). Options: --w <width> --h <height> --s <steps> --d <seed> --g <guidance> --m <multipliers for LoRA>"
-                " --n <negative prompt>, `-` for empty negative prompt --c <cfg_scale>"
-            )
-            prompt = input()
-            if prompt == "":
-                break
-
-            # parse options
-            options = prompt.split("--")
-            prompt = options[0].strip()
-            seed = None
-            negative_prompt = None
-            for opt in options[1:]:
-                try:
-                    opt = opt.strip()
-                    if opt.startswith("w"):
-                        width = int(opt[1:].strip())
-                    elif opt.startswith("h"):
-                        height = int(opt[1:].strip())
-                    elif opt.startswith("s"):
-                        steps = int(opt[1:].strip())
-                    elif opt.startswith("d"):
-                        seed = int(opt[1:].strip())
-                    elif opt.startswith("g"):
-                        guidance = float(opt[1:].strip())
-                    elif opt.startswith("m"):
-                        mutipliers = opt[1:].strip().split(",")
-                        if len(mutipliers) != len(lora_models):
-                            logger.error(f"Invalid number of multipliers, expected {len(lora_models)}")
-                            continue
-                        for i, lora_model in enumerate(lora_models):
-                            lora_model.set_multiplier(float(mutipliers[i]))
-                    elif opt.startswith("n"):
-                        negative_prompt = opt[1:].strip()
-                        if negative_prompt == "-":
-                            negative_prompt = ""
-                    elif opt.startswith("c"):
-                        cfg_scale = float(opt[1:].strip())
-                except ValueError as e:
-                    logger.error(f"Invalid option: {opt}, {e}")
-
-            generate_image(model, clip_l, t5xxl, ae, prompt, seed, width, height, steps, guidance, negative_prompt, cfg_scale)
-
+    
+    for removed_blocks in range(config.num_reduced_blocks):
+        lpips_single = {}
+        cmmd_single = {}
+        lpips_double = {}
+        cmmd_double = {}
+        if config.remove_single_blocks:
+            for idx_single_block in single_blocks:
+                config.single_blocks = [idx_single_block]
+                config.double_blocks = []
+                del model
+                is_schnell, model = flux_utils.load_flow_model(config.ckpt_path, None, loading_device)
+                model.eval()
+                logger.info(f"Casting model to {flux_dtype}")
+                model.to(flux_dtype)  # make sure model is dtype
+                model = modify_model(model,config.double_blocks, config.single_blocks)
+                model = modify_model(model,removed_double_blocks, removed_single_blocks)
+                for prompt_idx, prompt in enumerate(prompts):
+                    config.output_dir = single_path + str(idx_single_block) + "/prompt_"+ str(prompt_idx) + ".png"
+                    if not os.path.exists(single_path + str(idx_single_block)):
+                        os.makedirs("single_path" + str(idx_single_block))
+                    generate_image(
+                        model,
+                        clip_l,
+                        t5xxl,
+                        ae,
+                        config, 
+                        prompt,
+                        config.seed,
+                        config.width,
+                        config.height,
+                        config.steps,
+                        config.guidance,
+                        config.negative_prompt,
+                        config.cfg_scale,
+                    )
+                lpips_single[idx_single_block] = calculate_lpips(ref_path, img_path)
+                cmmd_single[idx_single_block] = compute_cmmd(ref_path, img_path)  
+                 
+            with open("./block_analysis/lpips_single_dict.jsone", "a") as f:
+                f.dump(lpips_single)
+            with open("./block_analysis/cmmd_single_dict.jsone", "a") as f:
+                f.dump(cmmd_single) 
+                    
+                    
+        elif config.remove_double_blocks:
+            config.double_blocks = []
+            config.single_blocks = []
+            for idx_double_block in double_blocks:
+                config.double_blocks = [idx_double_block]
+                del model
+                is_schnell, model = flux_utils.load_flow_model(config.ckpt_path, None, loading_device)
+                model.eval()
+                logger.info(f"Casting model to {flux_dtype}")
+                model.to(flux_dtype)  # make sure model is dtype
+                model = modify_model(model,config.double_blocks, config.single_blocks)
+                model = modify_model(model,removed_double_blocks, removed_single_blocks)
+                for prompt_idx, prompt in enumerate(prompts):
+                    config.output_dir = double_path + str(idx_double_block) + "/prompt_"+ str(prompt_idx) + ".png"
+                    if not os.path.exists(double_path + str(idx_double_block)):
+                        os.makedirs(double_path + str(idx_double_block))
+                    generate_image(
+                        model,
+                        clip_l,
+                        t5xxl,
+                        ae,
+                        config, 
+                        prompt,
+                        config.seed,
+                        config.width,
+                        config.height,
+                        config.steps,
+                        config.guidance,
+                        config.negative_prompt,
+                        config.cfg_scale,
+                    )
+                    
+            with open("./block_analysis/lpips_double_dict.jsone", "a") as f:
+                f.dump(lpips_double)
+            with open("./block_analysis/cmmd_double_dict.jsone", "a") as f:
+                f.dump(cmmd_double) 
+            
+        best_block, block_type = best_network(cmmd_single, lpips_single, cmmd_double, lpips_double, single_blocks, double_blocks)
+        if block_type=="single":
+            removed_single_blocks.append(best_block)
+            single_blocks.remove(best_block)
+        elif block_type=="double":
+            removed_double_blocks.append(best_block)
+            double_blocks.remove(best_block)
+            
+        with open("./block_analysis/results.txt", "a") as f: 
+            f.write("Remaining single blocks: " + str(single_blocks) + "\n")
+            f.write("Remaining double blocks: " + str(double_blocks) + "\n")
+            f.write("\n")
+            f.write("\n")
+        
     logger.info("Done!")

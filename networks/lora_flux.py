@@ -9,16 +9,17 @@
 
 import math
 import os
+import re
 from contextlib import contextmanager
 from typing import Dict, List, Optional, Tuple, Type, Union
-from diffusers import AutoencoderKL
-from transformers import CLIPTextModel
+
 import numpy as np
 import torch
-from torch import Tensor
-import re
-from library.utils import setup_logging
+from diffusers import AutoencoderKL
 from library.sdxl_original_unet import SdxlUNet2DConditionModel
+from library.utils import setup_logging
+from torch import Tensor
+from transformers import CLIPTextModel
 
 setup_logging()
 import logging
@@ -1249,8 +1250,8 @@ class LoRANetwork(torch.nn.Module):
                 state_dict[key] = v
 
         if os.path.splitext(file)[1] == ".safetensors":
-            from safetensors.torch import save_file
             from library import train_util
+            from safetensors.torch import save_file
 
             # Precalculate model hashes to save time on indexing
             if metadata is None:

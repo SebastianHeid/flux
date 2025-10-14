@@ -1,50 +1,49 @@
-import importlib
 import argparse
+import importlib
+import json
 import math
 import os
-import typing
-from typing import Any, List, Union, Optional
-import sys
 import random
+import sys
 import time
-import json
+import typing
 from multiprocessing import Value
+from typing import Any, List, Optional, Union
+
 import numpy as np
 import toml
-
-from tqdm import tqdm
-
 import torch
+from library.device_utils import clean_memory_on_device, init_ipex
+from myCode.normalize_feature_loss import (
+    normalization_feature_loss,
+    normalize_feature_loss,
+)
 from torch.types import Number
-from library.device_utils import init_ipex, clean_memory_on_device
+from tqdm import tqdm
 
 init_ipex()
 
-from accelerate.utils import set_seed
+import library.config_util as config_util
+import library.custom_train_functions as custom_train_functions
+import library.huggingface_util as huggingface_util
+import library.train_util as train_util
 from accelerate import Accelerator
+from accelerate.utils import set_seed
 from diffusers import DDPMScheduler
 from diffusers.models.autoencoders.autoencoder_kl import AutoencoderKL
 from library import deepspeed_utils, model_util, strategy_base, strategy_sd
-
-import library.train_util as train_util
-from library.train_util import DreamBoothDataset
-import library.config_util as config_util
-from library.config_util import (
-    ConfigSanitizer,
-    BlueprintGenerator,
-)
-import library.huggingface_util as huggingface_util
-import library.custom_train_functions as custom_train_functions
+from library.config_util import BlueprintGenerator, ConfigSanitizer
 from library.custom_train_functions import (
+    add_v_prediction_like_loss,
+    apply_debiased_estimation,
+    apply_masked_loss,
     apply_snr_weight,
     get_weighted_text_embeddings,
     prepare_scheduler_for_custom_training,
     scale_v_prediction_loss_like_noise_prediction,
-    add_v_prediction_like_loss,
-    apply_debiased_estimation,
-    apply_masked_loss,
 )
-from library.utils import setup_logging, add_logging_arguments
+from library.train_util import DreamBoothDataset
+from library.utils import add_logging_arguments, setup_logging
 
 setup_logging()
 import logging
@@ -446,7 +445,7 @@ class NetworkTrainer:
                         text_encoder_conds[i] = encoded_text_encoder_conds[i]
 
         # sample noise, call unet, get target
-        noise_pred, target, timesteps, weighting = self.get_noise_pred_and_target(
+        noise_pred, target, timesteps, weighting, feat_double, feat_single = self.get_noise_pred_and_target(
             args,
             accelerator,
             noise_scheduler,
@@ -459,6 +458,22 @@ class NetworkTrainer:
             train_unet,
             is_train=is_train,
         )
+        
+        if args.KD_flag:
+            ref_noise_pred, _, _, _, ref_feat_double, ref_feat_single = self.get_noise_pred_and_target(
+            args,
+            accelerator,
+            noise_scheduler,
+            latents,
+            batch,
+            text_encoder_conds,
+            unet,
+            network,
+            weight_dtype,
+            train_unet,
+            is_train=is_train,
+        )
+            
 
         huber_c = train_util.get_huber_threshold_if_needed(args, timesteps, noise_scheduler)
         loss = train_util.conditional_loss(noise_pred.float(), target.float(), args.loss_type, "none", huber_c)
@@ -467,10 +482,33 @@ class NetworkTrainer:
         if args.masked_loss or ("alpha_masks" in batch and batch["alpha_masks"] is not None):
             loss = apply_masked_loss(loss, batch)
         loss = loss.mean([1, 2, 3])
+        if args.final_loss_flag:
+            l = train_util.conditional_loss(noise_pred.float(), ref_noise_pred.float(), args.loss_type, "none", huber_c)
+            l_final = l.mean([1, 2, 3])
+            loss += args.final_loss_weighting * l_final
+        if args.feature_loss_flag:
+            single_block_loss = []
+            for idx in args.single_feature_loss_list:
+                l = train_util.conditional_loss(feat_single[idx].float(), ref_feat_single[idx].float(), args.loss_type, "none", huber_c)
+                l = l.mean([1,2])
+                single_block_loss.append(l)
+            if not len(single_block_loss)==0:
+                single_block_loss=torch.stack(single_block_loss,dim=0)
+                single_block_loss = normalization_feature_loss(single_block_loss)
+                loss += args.single_loss_weighting * single_block_loss.mean(0)
+            
+            double_block_loss = []
+            for idx in args.double_feature_loss_list:
+                l = train_util.conditional_loss(feat_double[idx].float(), ref_feat_double[idx].float(), args.loss_type, "none", huber_c)
+                l = l.mean([1,2])
+                double_block_loss.append(l)
+            if not len(double_block_loss)==0:
+                double_block_loss=torch.stack(double_block_loss,dim=0)
+                double_block_loss = normalization_feature_loss(double_block_loss)
+                loss += args.double_loss_weighting * double_block_loss.mean(0)
 
         loss_weights = batch["loss_weights"]  # 各sampleごとのweight
         loss = loss * loss_weights
-
         loss = self.post_process_loss(loss, args, timesteps, noise_scheduler)
 
         return loss.mean()
@@ -586,7 +624,7 @@ class NetworkTrainer:
         vae_dtype = torch.float32 if args.no_half_vae else weight_dtype
 
         # モデルを読み込む
-        model_version, text_encoder, vae, unet = self.load_target_model(args, weight_dtype, accelerator)
+        model_version, text_encoder, vae, unet, ref_model = self.load_target_model(args, weight_dtype, accelerator)
 
         # text_encoder is List[CLIPTextModel] or CLIPTextModel
         text_encoders = text_encoder if isinstance(text_encoder, list) else [text_encoder]

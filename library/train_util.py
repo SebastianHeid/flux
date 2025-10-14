@@ -2239,6 +2239,9 @@ class FineTuningDataset(BaseDataset):
                         npz_path = os.path.join(subset.image_dir, image_key)
                         if os.path.exists(npz_path):
                             abs_path = npz_path
+                print("subset.image_dir: ", subset.image_dir)
+                print("image_key: ", image_key)
+                print("abs_path: ", abs_path)
                 assert abs_path is not None, f"no image / 画像がありません: {image_key}"
 
                 caption = img_md.get("caption")
@@ -4649,6 +4652,12 @@ def add_KD_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--single_feature_loss_list", nargs="+", type=int, default=[], help="List of single blocks after which features should be used for loss calculation")
     parser.add_argument("--double_feature_loss_list", nargs="+", type=int, default=[], help="List of double blocks after which features should be used for loss calculation")
     parser.add_argument("--pre_block_gpu", action="store_true", help="Block gpu memeory so that others can see that a training was started and do not also start another training.")
+    parser.add_argument("--double_loss_weighting", type=float, default=1.0, help="Weighting factor for double loss")
+    parser.add_argument("--single_loss_weighting", type=float, default=1.0, help="Weighting factor for single loss")
+    parser.add_argument("--final_loss_weighting", type=float, default=1.0, help="Weighting factor for final loss")
+    parser.add_argument("--original_loss_weighting", type=float, default=1.0, help="Weighting factor for original loss")
+    parser.add_argument("--freeze_double_blocks", action="store_true", help="Weighting factor for original loss")
+
 
 
 def read_config_from_file(args: argparse.Namespace, parser: argparse.ArgumentParser):
@@ -5454,7 +5463,7 @@ def prepare_accelerator(args: argparse.Namespace):
         dynamo_backend=dynamo_backend,
         deepspeed_plugin=deepspeed_plugin,
     )
-    print("accelerator device:", accelerator.device)
+   
     return accelerator
 
 
