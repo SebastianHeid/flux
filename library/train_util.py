@@ -4643,6 +4643,8 @@ def add_KD_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--KD_flag", action="store_true", help="Set it if knowledge distillation should be performed.")
     parser.add_argument("--remove_single_blocks", nargs="+", type=int, default=[], help="Specify which single blocks are removed from the flux architecutre. 0-37")
     parser.add_argument("--remove_double_blocks", nargs="+", type=int, default=[], help="Specify which double blocks are removed from the flux architecutre. 0-18")
+    parser.add_argument("--compress_single_blocks", nargs="+", type=int, default=[], help="Specify which single blocks are removed from the flux architecutre. 0-37")
+    parser.add_argument("--compress_double_blocks", nargs="+", type=int, default=[], help="Specify which double blocks are removed from the flux architecutre. 0-18")
     parser.add_argument("--trainable_single_blocks", nargs="+", type=int, default=[], help="Specify which single blocks are set trainable. 0-37")
     parser.add_argument("--trainable_double_blocks", nargs="+", type=int, default=[], help="Specify which double blocks are set trainable. 0-18")
     parser.add_argument("--partially_trainable_model", action="store_true", help="If the total model is trainable")
@@ -4655,8 +4657,34 @@ def add_KD_arguments(parser: argparse.ArgumentParser):
     parser.add_argument("--double_loss_weighting", type=float, default=1.0, help="Weighting factor for double loss")
     parser.add_argument("--single_loss_weighting", type=float, default=1.0, help="Weighting factor for single loss")
     parser.add_argument("--final_loss_weighting", type=float, default=1.0, help="Weighting factor for final loss")
+    parser.add_argument("--color_loss_weight", type=float, default=1.0, help="Weighting factor for final loss")
     parser.add_argument("--original_loss_weighting", type=float, default=1.0, help="Weighting factor for original loss")
     parser.add_argument("--freeze_double_blocks", action="store_true", help="Weighting factor for original loss")
+    parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mod", action="store_true", help="Flag")
+    parser.add_argument("--single_rank_mod", type=int, default=256, help="rank")
+    parser.add_argument("--single_rank_mlp2", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_attn", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_mlp", type=int, default=512, help="rank")
+    
+    parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_mlp", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
+    
+    parser.add_argument("--double_rank_img_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_img_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_attn",type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_txt_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_attn", type=int, default=512, help="rank")
+    parser.add_argument("--pruned_model_path", type=str, default="", help="")
+    
+    
 
 
 

@@ -606,6 +606,7 @@ class QKNorm(torch.nn.Module):
 class SelfAttention(nn.Module):
     def __init__(self, dim: int, num_heads: int = 8, qkv_bias: bool = False):
         super().__init__()
+        self.dim = dim
         self.num_heads = num_heads
         head_dim = dim // num_heads
 
@@ -649,7 +650,9 @@ class Modulation(nn.Module):
 class DoubleStreamBlock(nn.Module):
     def __init__(self, hidden_size: int, num_heads: int, mlp_ratio: float, qkv_bias: bool = False):
         super().__init__()
-
+        self.mlp_ratio = mlp_ratio 
+        self.hidden_size = hidden_size
+        self.qkv_bias = qkv_bias
         mlp_hidden_dim = int(hidden_size * mlp_ratio)
         self.num_heads = num_heads
         self.hidden_size = hidden_size
@@ -775,8 +778,10 @@ class SingleStreamBlock(nn.Module):
         super().__init__()
         self.hidden_dim = hidden_size
         self.num_heads = num_heads
+        self.qk_scale = qk_scale
         head_dim = hidden_size // num_heads
         self.scale = qk_scale or head_dim**-0.5
+        self.mlp_ratio = mlp_ratio
 
         self.mlp_hidden_dim = int(hidden_size * mlp_ratio)
         # qkv and mlp_in
@@ -1045,7 +1050,7 @@ class Flux(nn.Module):
             for block_idx, block in enumerate(self.double_blocks):
                 img, txt = block(img=img, txt=txt, vec=vec, pe=pe, txt_attention_mask=txt_attention_mask)
                 if KD_flag:
-                    double_block_features += (img, )
+                    double_block_features += (torch.cat((txt, img), 1), )
                 if block_controlnet_hidden_states is not None and controlnet_depth > 0:
                     img = img + block_controlnet_hidden_states[block_idx % controlnet_depth]
 
@@ -1062,7 +1067,7 @@ class Flux(nn.Module):
 
                 img, txt = block(img=img, txt=txt, vec=vec, pe=pe, txt_attention_mask=txt_attention_mask)
                 if KD_flag:
-                    double_block_features += (img, )
+                    double_block_features += (torch.cat((txt, img), 1), )
                 if block_controlnet_hidden_states is not None and controlnet_depth > 0:
                     img = img + block_controlnet_hidden_states[block_idx % controlnet_depth]
 

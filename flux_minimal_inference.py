@@ -2,11 +2,12 @@
 
 import argparse
 import datetime
+import json
 import math
 import os
 import random
 from typing import Callable, List, Optional
-import json 
+
 import accelerate
 import einops
 import numpy as np
@@ -294,6 +295,7 @@ def generate_image(
                     )
         return l_pooled, t5_out, txt_ids, t5_attn_mask
 
+    print("prompt: ", prompt)
     l_pooled, t5_out, txt_ids, t5_attn_mask = encode(prompt)
     if negative_prompt:
         neg_l_pooled, neg_t5_out, _, neg_t5_attn_mask = encode(negative_prompt)
@@ -398,14 +400,15 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
+    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
     parser.add_argument("--prompt", type=str, default=" A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.")
-    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
+    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/SVD/flux/image/FastFlux/single_mlp2")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
     parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
@@ -428,35 +431,61 @@ if __name__ == "__main__":
     parser.add_argument("--width", type=int, default=target_width)
     parser.add_argument("--height", type=int, default=target_height)
     parser.add_argument("--interactive", action="store_true")
-    parser.add_argument("--double_blocks", nargs='+', type=int, default=[13,14,10])
-    parser.add_argument("--single_blocks", nargs='+', type=int, default=[3, 21, 22, 24, 28, 0, 1, 19, 20, 33,10,12,15,18,23,25])
-    # parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
-    # parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
+    #parser.add_argument("--double_blocks", nargs='+', type=int, default=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17])
+    parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
+    parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
+    parser.add_argument("--single_blocks_compress", nargs='+', type=int, default=[])
+    parser.add_argument("--double_blocks_compress", nargs='+', type=int, default=[])
+    #parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
     parser.add_argument("--image_name", type=str, default="img.png")
+    parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
+    parser.add_argument("--single_flag_mod", action="store_true", help="Flag")
+    parser.add_argument("--single_rank_mod", type=int, default=256, help="rank")
+    parser.add_argument("--single_rank_mlp2", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_attn", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_mlp", type=int, default=512, help="rank")
+    
+    parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_mlp", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
+    
+    parser.add_argument("--double_rank_img_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_img_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_attn",type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_txt_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_attn", type=int, default=512, help="rank")
     args = parser.parse_args()
   
 
     prompts = [
     "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
-    "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
-    "A dynamic action shot of a cheetah chasing its prey across a vast African savanna at sunset, with dust kicking up and a blur of motion.",
-    "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background."
+    "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
+    #"A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
+   "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
+   # "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background."
 ]
 
-    prompts = ["Stylized portrait of a blonde paladin, in the Anna Podedworna style.",
-              "A photo of a purple sheep and a pink banana.",
-              "A photo of a sandwich.",
-              "Oil portrait of a young black woman wearing a wildflower crown in golden light."]
+    # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
+    #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
+    #           "Surreal bioluminescent forest made of glowing circuitry vines, holographic butterflies, neon moss, volumetric ethereal fog, soft blue and violet light, hyper-detailed fantasy environment, calm mystical atmosphere, ultra-wide cinematic angle",
+    #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
     
     
-    # with open("/home/hd/hd_hd/hd_om233/partially_removal/MasterThesis_Evaluation/data_info_val_1k.json", "r") as file:
-    #     prompts = json.load(file)
+    with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
+        data = json.load(file)
         
-    #prompts = []
-    # for d in data.values():
-    #     prompts.append(d)
+    prompts = []
+    for d in data.values():
+        prompts.append(d)
     
     print(len(prompts))
+    print(prompts[0])
     seed = args.seed
     steps = args.steps
     guidance_scale = args.guidance
@@ -482,17 +511,44 @@ if __name__ == "__main__":
         
         
     print(loading_device)
-    is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
+    is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
     model.eval()
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
     print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    model = modify_model(model, args.double_blocks, args.single_blocks)
+    model = modify_model(model,
+                         args.double_blocks,
+                         args.single_blocks,
+                        single_blocks_comp = args.single_blocks_compress,
+                        double_blocks_comp = args.double_blocks_compress,
+                        single_flag_attn=args.single_flag_attn,
+                        single_flag_mlp=args.single_flag_mlp,
+                        single_flag_mlp2=args.single_flag_mlp2,
+                        single_flag_mod=args.single_flag_mod,
+                        single_rank_mod=args.single_rank_mod,
+                        single_rank_mlp2=args.single_rank_mlp2,
+                        single_rank_attn=args.single_rank_attn,
+                        single_rank_mlp=args.single_rank_mlp,
+                        double_flag_img_attn=args.double_flag_img_attn,
+                        double_flag_txt_attn=args.double_flag_txt_attn,
+                        double_flag_img_mlp= args.double_flag_img_mlp,
+                        double_flag_txt_mlp=args.double_flag_txt_mlp,
+                        double_flag_img_mod=args.double_flag_img_mod,
+                        double_flag_txt_mod=args.double_flag_txt_mod,   
+                        double_rank_img_mod=args.double_rank_img_mod,
+                        double_rank_img_mlp=args.double_rank_img_mlp,
+                        double_rank_img_attn=args.double_rank_img_attn,
+                        double_rank_txt_mod=args.double_rank_txt_mod,
+                        double_rank_txt_mlp=args.double_rank_txt_mlp,
+                        double_rank_txt_attn=args.double_rank_txt_attn,)
     for name, param in model.named_parameters():
         if param.is_meta:
             print(f"Meta tensor found: {name}")
+    
+    # state_dict = load_file(args.ckpt_path)
+    # model.load_state_dict(state_dict, strict=False)
   
-    print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+    print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
     
     
     
@@ -570,6 +626,7 @@ if __name__ == "__main__":
     if not args.interactive:
         #for idx, (prompt_name,  prompt) in enumerate(prompts.items()):
         for idx, prompt in enumerate(prompts):
+            print(prompt)
             generate_image(
                 model,
                 clip_l,
@@ -640,4 +697,5 @@ if __name__ == "__main__":
 
             generate_image(model, clip_l, t5xxl, ae, prompt, seed, width, height, steps, guidance, negative_prompt, cfg_scale)
 
+    logger.info("Done!")
     logger.info("Done!")

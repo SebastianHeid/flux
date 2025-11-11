@@ -1,0 +1,39 @@
+#!/bin/bash
+#SBATCH --job-name=geneval_comp_d_12_s_12_KD_only_all_trainable
+#SBATCH --output=/home/hd/hd_hd/hd_om233/SVD/flux/script/std_out/geneval_comp_d_12_s_12_KD_only_all_trainable.txt
+#SBATCH --error=/home/hd/hd_hd/hd_om233/SVD/flux/script/std_error/geneval_comp_d_12_s_12_KD_only_all_trainable.txt
+
+#SBATCH --partition=gpu-single
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=12 
+#SBATCH --mem=20G  
+#SBATCH --time=20:00:00 
+#SBATCH --export=NONE
+#SBATCH --gres=gpu:A100:1
+#SBATCH --ntasks=1    
+
+
+#--------------------
+# CONDA SETUP
+#--------------------
+source ~/miniconda3/etc/profile.d/conda.sh
+conda activate flux_train
+
+python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference_geneval.py \
+    --metadata_file /home/hd/hd_hd/hd_om233/ModelEvaluationBenchmarks/geneval/prompts/evaluation_metadata.jsonl \
+    --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/geneval/geneval_comp_d_12_s_12_KD_only_all_trainable \
+    --n_samples 4 \
+    --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+    --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only_all_trainable/test-step00011500.safetensors \
+    --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+    --double_flag_img_attn \
+    --double_flag_txt_attn \
+    --double_flag_img_mlp \
+    --double_flag_txt_mlp \
+    --double_flag_img_mod \
+    --double_flag_txt_mod \
+    --single_blocks_compress 19 24 12 22 26 31 10 20 23 29 15 25 \
+    --single_flag_mod \
+    --single_flag_mlp2 \
+    --single_rank_mlp2 1024 \
+    --single_rank_mod 512

@@ -10,7 +10,8 @@ import copy
 import gc
 import math
 import os
-import sys 
+import sys
+from library.utils import load_safetensors
 # Key features:
 # - CPU offloading during forward and backward passes
 # - Use of fused optimizer and grad_hook for efficient gradient processing
@@ -26,8 +27,10 @@ import torch.nn as nn
 from library import utils
 from library.device_utils import clean_memory_on_device, init_ipex
 from myCode.normalize_feature_loss import (
+    compute_color_consistency_loss,
     normalization_feature_loss,
     normalize_feature_loss,
+    normalized_feature_distillation_loss,
 )
 from tqdm import tqdm
 
@@ -404,8 +407,46 @@ def train(args):
 
     if args.gradient_checkpointing:
         flux.enable_gradient_checkpointing(cpu_offload=args.cpu_offload_checkpointing)
-
-    flux = modify_model(flux, args.remove_double_blocks, args.remove_single_blocks)
+    flux = flux.to("cuda")
+    device = next(flux.parameters()).device
+    flux = modify_model(flux, 
+                        args.remove_double_blocks,
+                        args.remove_single_blocks,
+                        single_blocks_comp=args.compress_single_blocks, 
+                        double_blocks_comp=args.compress_double_blocks,
+                        single_flag_attn=args.single_flag_attn,
+                        single_flag_mlp=args.single_flag_mlp,
+                        single_flag_mlp2=args.single_flag_mlp2,
+                        single_flag_mod=args.single_flag_mod,
+                        single_rank_mod=args.single_rank_mod,
+                        single_rank_mlp2=args.single_rank_mlp2,
+                        single_rank_attn=args.single_rank_attn,
+                        single_rank_mlp=args.single_rank_mlp,
+                        double_flag_img_attn=args.double_flag_img_attn,
+                        double_flag_txt_attn=args.double_flag_txt_attn,
+                        double_flag_img_mlp= args.double_flag_img_mlp,
+                        double_flag_txt_mlp=args.double_flag_txt_mlp,
+                        double_flag_img_mod=args.double_flag_img_mod,
+                        double_flag_txt_mod=args.double_flag_txt_mod,   
+                        double_rank_img_mod=args.double_rank_img_mod,
+                        double_rank_img_mlp=args.double_rank_img_mlp,
+                        double_rank_img_attn=args.double_rank_img_attn,
+                        double_rank_txt_mod=args.double_rank_txt_mod,
+                        double_rank_txt_mlp=args.double_rank_txt_mlp,
+                        double_rank_txt_attn=args.double_rank_txt_attn,
+                        )
+    print("Model parameters: ", sum(p.numel() for p in flux.parameters()))
+    
+    flux = flux.to("cpu")
+    sd = {}
+    
+    sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
+    info = flux.load_state_dict(sd, strict=False, assign=True)
+    
+    print("Info: ", info)
+    
+    
+    
     flux.requires_grad_(True)
     if args.partially_trainable_model:
         flux.requires_grad_(False)
@@ -423,15 +464,17 @@ def train(args):
                 param.requires_grad = False
 
     # laod reference FLUX if KD True
+    print("LoaD REF MODEL")
     if args.KD_flag:
         _, ref_flux = flux_utils.load_flow_model(
             args.pretrained_ref_model_name_or_path, weight_dtype, "cpu", args.disable_mmap_load_safetensors
         )
-        ref_flux.requires_grad_(True)
+        ref_flux.requires_grad_(False)
         
     # block swap
 
     # backward compatibility
+    print("Block Swapping")
     if args.blocks_to_swap is None:
         blocks_to_swap = args.double_blocks_to_swap or 0
         if args.single_blocks_to_swap is not None:
@@ -867,35 +910,63 @@ def train(args):
                     if args.final_loss_flag:
                         l = train_util.conditional_loss(model_pred.float(), ref_model_pred.float(), args.loss_type, "none", huber_c)
                         l_final = l.mean([1,2,3])
+                        
+                        # color_loss = compute_color_consistency_loss(model_pred, ref_model_pred)
+                        # loss += args.color_loss_weight * color_loss
+                        
                         loss += args.final_loss_weighting * l_final
                     if args.original_loss_flag:
                         target = noise - latents
                         l =  train_util.conditional_loss(model_pred.float(), target.float(), args.loss_type, "none", huber_c)
                         l_org = l.mean([1,2,3])
+                        
                         loss += args.original_loss_weighting * l_org
-                    if args.feature_loss_flag:
-                        single_block_loss = []
-                        for idx in args.single_feature_loss_list:
-                            l = train_util.conditional_loss(single_block_features[idx].float(), ref_single_block_features[idx].float(), args.loss_type, "none", huber_c)
-                            l = l.mean([1,2])
-                            single_block_loss.append(l)
-                        if not len(single_block_loss)==0:
-                            single_block_loss=torch.stack(single_block_loss,dim=0)
-                            single_block_loss = normalization_feature_loss(single_block_loss)
-                            loss += args.single_loss_weighting * single_block_loss.mean(0)
+                    #if args.feature_loss_flag:
+                    #     single_block_loss = []
+                        # for idx in args.single_feature_loss_list:
+                        #     l = train_util.conditional_loss(single_block_features[idx].float(), ref_single_block_features[idx].float(), args.loss_type, "none", huber_c)
+                        #     l = l.mean([1,2])
+                        #     single_block_loss.append(l)
+                        # if not len(single_block_loss)==0:
+                        #     single_block_loss=torch.stack(single_block_loss,dim=0)
+                        #     single_block_loss = normalization_feature_loss(single_block_loss)
+                        #     loss += args.single_loss_weighting * single_block_loss.mean(0)
                         
-                        double_block_loss = []
-                        for idx in args.double_feature_loss_list:
-                            l = train_util.conditional_loss(double_block_features[idx].float(), ref_double_block_features[idx].float(), args.loss_type, "none", huber_c)
-                            l = l.mean([1,2])
-                            double_block_loss.append(l)
-                        if not len(double_block_loss)==0:
-                            double_block_loss=torch.stack(double_block_loss,dim=0)
-                            double_block_loss = normalization_feature_loss(double_block_loss)
-                            loss += args.double_loss_weighting * double_block_loss.mean(0)
-                    loss = loss.mean()
+                            # print("Single: ", single_block_loss)
+                            # print("Single loss: ", single_block_loss.mean(0))
+                            
+                        # double_block_loss = []
+                        # for idx in args.double_feature_loss_list:
+                        #     l = train_util.conditional_loss(double_block_features[idx].float(), ref_double_block_features[idx].float(), args.loss_type, "none", huber_c)
+                        #     l = l.mean([1,2])
+                        #     double_block_loss.append(l)
+                        # if not len(double_block_loss)==0:
+                        #     double_block_loss=torch.stack(double_block_loss,dim=0)
+                        #     double_block_loss = normalization_feature_loss(double_block_loss)
+                        #     loss += args.double_loss_weighting * double_block_loss.mean(0)
                         
+                        
+                        # -------------------- feature loss computation from Dense2MoE paper  ---------------------------
+                    if args.single_feature_loss_list:
+                        single_block_features_ = [single_block_features[i] for i in args.single_feature_loss_list]
+                        ref_single_block_features_ = [ref_single_block_features[i] for i in args.single_feature_loss_list]  
+                        l_final_abs_nograd = l_final.detach().abs()
+                        norm_single_feat_loss = normalized_feature_distillation_loss(ref_single_block_features_, single_block_features_, l_final_abs_nograd)
+                        loss +=  args.single_loss_weighting * norm_single_feat_loss
                 
+                    
+                    if args.double_feature_loss_list:
+                        double_block_features_ = [double_block_features[i] for i in args.double_feature_loss_list]
+                        ref_double_block_features_ = [ref_double_block_features[i] for i in args.double_feature_loss_list]
+                        l_final_abs_nograd = l_final.detach().abs()
+                        norm_double_feat_loss = normalized_feature_distillation_loss(ref_double_block_features_, double_block_features_, l_final_abs_nograd)
+                        loss += args.double_loss_weighting * norm_double_feat_loss
+                      
+                          
+                        # --------------------------------------------------------------------------------------------------
+                    loss = loss.mean()
+                 
+
                 else:
                     # flow matching loss: this is different from SD3
                     target = noise - latents
@@ -958,13 +1029,32 @@ def train(args):
                             global_step,
                             accelerator.unwrap_model(flux),
                         )
-                    sys.exit()
+                    
                     
                 optimizer_train_fn()
 
             current_loss = loss.detach().item()  # 平均なのでbatch sizeは関係ないはず
             if len(accelerator.trackers) > 0:
-                logs = {"loss": current_loss}
+                logs = {"loss": current_loss
+           #             "color_loss": color_loss.detach().item(),
+                        # "norm_single_feat_loss": args.single_loss_weighting*norm_single_feat_loss.detach().item(),
+                        # "norm_double_feat_loss": args.double_loss_weighting*norm_double_feat_loss.detach().item(),
+                        # "l_final": args.final_loss_weighting*l_final.detach().item(),
+                      #  "l_org": args.original_loss_weighting*l_org.detach().item()
+                        
+                        }
+                if args.KD_flag:
+                    if args.single_feature_loss_list:
+                        logs["norm_single_feat_loss"] = args.single_loss_weighting*norm_single_feat_loss.detach().item()
+                        
+                    if args.double_feature_loss_list:
+                        logs["norm_double_feat_loss"] = args.double_loss_weighting*norm_double_feat_loss.detach().item()
+                    
+                    if args.final_loss_flag:
+                        logs["l_final"] = args.final_loss_weighting*l_final.detach().item()
+                        
+                    if args.original_loss_flag:
+                        logs["l_org"] = args.original_loss_weighting*l_org.detach().item()
                 # if args.final_loss_flag:
                 #     logs["final_loss"] = l_final.detach().item()
                 # if args.original_loss_flag:
@@ -1098,3 +1188,4 @@ if __name__ == "__main__":
     args = train_util.read_config_from_file(args, parser)
 
     train(args)
+

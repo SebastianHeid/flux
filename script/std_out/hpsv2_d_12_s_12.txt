@@ -1,0 +1,18 @@
+get_preferred_device() -> cuda
+cuda
+Number of original flux model:  11901408320
+[19, 24, 12, 22, 26, 31, 10, 20, 23, 29, 15, 25]
+[13, 14, 10, 12, 11, 16, 9, 15, 3, 5, 17, 6]
+Modified double block  13
+Modified double block  14
+Modified double block  10
+Modified double block  12
+Modified double block  11
+Modified double block  16
+Modified double block  9
+Modified double block  15
+Modified double block  3
+Modified double block  5
+Modified double block  17
+Modified double block  6
+Number of compressed flux model:  8183157824

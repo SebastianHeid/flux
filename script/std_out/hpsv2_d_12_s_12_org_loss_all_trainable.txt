@@ -1,0 +1,6 @@
+get_preferred_device() -> cuda
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  8183157824

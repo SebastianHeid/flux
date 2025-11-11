@@ -1,0 +1,76 @@
+Starte CMMD-Auswertung von Block 1 bis 38...
+Bewerte jetzt: 1_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/1_block.
+Bewerte jetzt: 2_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/2_block.
+Bewerte jetzt: 3_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/3_block.
+Bewerte jetzt: 4_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/4_block.
+Bewerte jetzt: 5_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/5_block.
+Bewerte jetzt: 6_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/6_block.
+Bewerte jetzt: 7_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/7_block.
+Bewerte jetzt: 8_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/8_block.
+Bewerte jetzt: 9_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/9_block.
+Bewerte jetzt: 10_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/10_block.
+Bewerte jetzt: 11_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/11_block.
+Bewerte jetzt: 12_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_block.
+Bewerte jetzt: 13_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/13_block.
+Bewerte jetzt: 14_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/14_block.
+Bewerte jetzt: 15_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/15_block.
+Bewerte jetzt: 16_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/16_block.
+Bewerte jetzt: 17_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/17_block.
+Bewerte jetzt: 18_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/18_block.
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/19_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/20_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/21_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/22_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/23_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/24_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/25_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/26_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/27_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/28_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/29_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/30_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/31_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/32_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/33_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/34_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/35_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/36_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/37_block
+Warnung: Ordner nicht gefunden, überspringe: /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/38_block
+Alle Auswertungen abgeschlossen. Ergebnisse sind in /home/hd/hd_hd/hd_om233/partially_removal/MasterThesis_Evaluation/logs/flux/complet_block_removal_single_blocks.txt

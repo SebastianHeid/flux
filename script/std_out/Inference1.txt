@@ -1,0 +1,72 @@
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  9306182720
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  9046660160
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  8787137600
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  8527615040
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  8268092480
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  8008569920
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  7749047360
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  7489524800
+get_preferred_device() -> cuda
+100
+digital painting, cozy winter village scene, snow-covered houses, front view, snowman in the yard, warm yellow lights, Christmas decorations, wreaths, garlands, Victorian architecture, Christmas market, people bundled up in winter clothes, hats, scarves, snowfall, evening, starry sky, trees, decorated tree on left, storefronts, sign for toys, shop windows filled with toys, festive holiday atmosphere, calm and cold, cartoonish style, detailed and vibrant.
+cuda
+Number of original flux model:  11901408320
+Modify singel blocks:  []
+[]
+Number of compressed flux model:  7230002240

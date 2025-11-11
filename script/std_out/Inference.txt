@@ -1,0 +1,116 @@
+Starte CMMD-Auswertung von Block 1 bis 38...
+Bewerte jetzt: 1_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/1_single_block.
+Bewerte jetzt: 2_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/2_single_block.
+Bewerte jetzt: 3_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/3_single_block.
+Bewerte jetzt: 4_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/4_single_block.
+Bewerte jetzt: 5_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/5_single_block.
+Bewerte jetzt: 6_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/6_single_block.
+Bewerte jetzt: 7_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/7_single_block.
+Bewerte jetzt: 8_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/8_single_block.
+Bewerte jetzt: 9_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/9_single_block.
+Bewerte jetzt: 10_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/10_single_block.
+Bewerte jetzt: 11_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/11_single_block.
+Bewerte jetzt: 12_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/12_single_block.
+Bewerte jetzt: 13_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/13_single_block.
+Bewerte jetzt: 14_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/14_single_block.
+Bewerte jetzt: 15_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/15_single_block.
+Bewerte jetzt: 16_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 0 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/16_single_block.
+Bewerte jetzt: 17_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/17_single_block.
+Bewerte jetzt: 18_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/18_single_block.
+Bewerte jetzt: 19_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/19_single_block.
+Bewerte jetzt: 20_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/20_single_block.
+Bewerte jetzt: 21_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/21_single_block.
+Bewerte jetzt: 22_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/22_single_block.
+Bewerte jetzt: 23_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/23_single_block.
+Bewerte jetzt: 24_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/24_single_block.
+Bewerte jetzt: 25_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/25_single_block.
+Bewerte jetzt: 26_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/26_single_block.
+Bewerte jetzt: 27_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/27_single_block.
+Bewerte jetzt: 28_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/28_single_block.
+Bewerte jetzt: 29_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/29_single_block.
+Bewerte jetzt: 30_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/30_single_block.
+Bewerte jetzt: 31_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/31_single_block.
+Bewerte jetzt: 32_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/32_single_block.
+Bewerte jetzt: 33_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/33_single_block.
+Bewerte jetzt: 34_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/34_single_block.
+Bewerte jetzt: 35_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/35_single_block.
+Bewerte jetzt: 36_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/36_single_block.
+Bewerte jetzt: 37_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/37_single_block.
+Bewerte jetzt: 38_single_block
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original.
+Calculating embeddings for 100 images from /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/single_blocks/38_single_block.
+Alle Auswertungen abgeschlossen. Ergebnisse sind in /home/hd/hd_hd/hd_om233/partially_removal/MasterThesis_Evaluation/logs/flux/block_compression_single_blocks.txt
