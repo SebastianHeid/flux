@@ -37,20 +37,21 @@ export LD_LIBRARY_PATH=/usr/local/cuda-12.6/lib64:$LD_LIBRARY_PATH
 #   --double_rank_txt_mlp 2048 \
 #   --double_rank_txt_attn 2048
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/512_1024/ \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 512  \
-  --double_rank_img_mlp 1024 \
-  --double_rank_img_attn 1024 \
-  --double_rank_txt_mod 512 \
-  --double_rank_txt_mlp 1024 \
-  --double_rank_txt_attn 1024
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/512_1024/ \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 512  \
+#   --double_rank_img_mlp 1024 \
+#   --double_rank_img_attn 1024 \
+#   --double_rank_txt_mod 512 \
+#   --double_rank_txt_mlp 1024 \
+#   --double_rank_txt_attn 1024
 
 
 python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 1 \
+  --single_blocks_compress 13 14 10 12 11 16 9 15 3 5 \
   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/256_512/ \
   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
   --double_rank_img_mod 256  \
@@ -58,62 +59,66 @@ python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
   --double_rank_img_attn 512 \
   --double_rank_txt_mod 256 \
   --double_rank_txt_mlp 512 \
-  --double_rank_txt_attn 512
+  --double_rank_txt_attn 512 \
+  --single_rank_mlp2 1024 \
+  --single_rank_mod 512 \
+  --single_flag_mlp2 \
+  --single_flag_mod
 
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/128_256/ \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 128  \
-  --double_rank_img_mlp 256 \
-  --double_rank_img_attn 256 \
-  --double_rank_txt_mod 128 \
-  --double_rank_txt_mlp 256 \
-  --double_rank_txt_attn 256
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/128_256/ \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 128  \
+#   --double_rank_img_mlp 256 \
+#   --double_rank_img_attn 256 \
+#   --double_rank_txt_mod 128 \
+#   --double_rank_txt_mlp 256 \
+#   --double_rank_txt_attn 256
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/64_128/ \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 64  \
-  --double_rank_img_mlp 128 \
-  --double_rank_img_attn 128 \
-  --double_rank_txt_mod 64 \
-  --double_rank_txt_mlp 128 \
-  --double_rank_txt_attn 128
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/64_128/ \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 64  \
+#   --double_rank_img_mlp 128 \
+#   --double_rank_img_attn 128 \
+#   --double_rank_txt_mod 64 \
+#   --double_rank_txt_mlp 128 \
+#   --double_rank_txt_attn 128
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/32_64 \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 32  \
-  --double_rank_img_mlp 64 \
-  --double_rank_img_attn 64 \
-  --double_rank_txt_mod 32 \
-  --double_rank_txt_mlp 64 \
-  --double_rank_txt_attn 64
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/32_64 \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 32  \
+#   --double_rank_img_mlp 64 \
+#   --double_rank_img_attn 64 \
+#   --double_rank_txt_mod 32 \
+#   --double_rank_txt_mlp 64 \
+#   --double_rank_txt_attn 64
 
-  python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/16_32 \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 16  \
-  --double_rank_img_mlp 32 \
-  --double_rank_img_attn 32 \
-  --double_rank_txt_mod 16 \
-  --double_rank_txt_mlp 32 \
-  --double_rank_txt_attn 32
+#   python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/16_32 \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 16  \
+#   --double_rank_img_mlp 32 \
+#   --double_rank_img_attn 32 \
+#   --double_rank_txt_mod 16 \
+#   --double_rank_txt_mlp 32 \
+#   --double_rank_txt_attn 32
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/8_16 \
-  --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
-  --double_rank_img_mod 8  \
-  --double_rank_img_mlp 16 \
-  --double_rank_img_attn 16 \
-  --double_rank_txt_mod 8 \
-  --double_rank_txt_mlp 16 \
-  --double_rank_txt_attn 16
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation/12_blocks/8_16 \
+#   --double_flag_img_mod --double_flag_img_attn  --double_flag_txt_attn --double_flag_img_mlp --double_flag_txt_mlp --double_flag_txt_mod --double_flag_img_mod \
+#   --double_rank_img_mod 8  \
+#   --double_rank_img_mlp 16 \
+#   --double_rank_img_attn 16 \
+#   --double_rank_txt_mod 8 \
+#   --double_rank_txt_mlp 16 \
+#   --double_rank_txt_attn 16
 
 

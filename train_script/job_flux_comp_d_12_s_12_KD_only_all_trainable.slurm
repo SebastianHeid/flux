@@ -33,7 +33,7 @@ accelerate launch --mixed_precision bf16 --num_processes=1 --num_machines=1 --nu
 --huber_c 0.1 \
 --huber_schedule "snr" \
 --learning_rate 1.8e-6 \
---logging_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only_all_trainable \
+--logging_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only_all_trainable_correct \
 --log_tracker_name tensorboard \
 --log_with tensorboard \
 --loss_type "l2" \
@@ -46,7 +46,7 @@ accelerate launch --mixed_precision bf16 --num_processes=1 --num_machines=1 --nu
 --model_prediction_type raw \
 --optimizer_args "relative_step=False" "scale_parameter=False" "warmup_init=False" \
 --optimizer_type adafactor \
---output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only_all_trainable \
+--output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only_all_trainable_correct \
 --output_name test \
 --persistent_data_loader_workers \
 --pretrained_model_name_or_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
@@ -67,10 +67,8 @@ accelerate launch --mixed_precision bf16 --num_processes=1 --num_machines=1 --nu
 --KD_flag \
 --feature_loss_flag \
 --final_loss_flag \
---single_feature_loss_list 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 \
---double_feature_loss_list 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 \
---partially_trainable_model \
---trainable_double_blocks 13 14 10 12 11 16 9 15 3 5 17 6 \
+--single_feature_loss_list 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 \
+--double_feature_loss_list 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 \
 --compress_double_blocks 13 14 10 12 11 16 9 15 3 5 17 6 \
 --double_flag_img_attn \
 --double_flag_txt_attn \
@@ -78,7 +76,6 @@ accelerate launch --mixed_precision bf16 --num_processes=1 --num_machines=1 --nu
 --double_flag_txt_mlp \
 --double_flag_img_mod \
 --double_flag_txt_mod \
---trainable_single_blocks 19 24 12 22 26 31 10 20 23 29 15 25 \
 --compress_single_blocks 19 24 12 22 26 31 10 20 23 29 15 25 \
 --single_flag_mod \
 --single_flag_mlp2 \

@@ -9,7 +9,7 @@
 #SBATCH --mem=40G  
 #SBATCH --time=60:00:00 
 #SBATCH --export=NONE
-#SBATCH --gres=gpu:1,gpumem_per_gpu:40GB
+#SBATCH --gres=gpu:A100:1
 #SBATCH --ntasks=1    
 
 

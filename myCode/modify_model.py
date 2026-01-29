@@ -1,8 +1,9 @@
-from typing import Tuple, Union
+from typing import Tuple, Union, Optional, Literal
 
 import torch
 import torch.nn as nn
-from myCode.place_holder_blocks import (
+from GRASP.model_parts import SingleStreamBlockGRASPCompressed, DoubleStreamBlockGRASPCompressed, SingleStreamBlockGRASP, DoubleStreamBlockGRASP
+from myCode.place_holder_blocks_all import (
     DoubleStreamBlockPruned,
     Identity,
     IdentityD,
@@ -11,6 +12,79 @@ from myCode.place_holder_blocks import (
 
 
 def modify_model(model,
+                 double_blocks,
+                 single_blocks, 
+                 single_blocks_comp = [],
+                 double_blocks_comp = [],
+                 single_flag_attn=False,
+                 single_flag_mlp=False,
+                 single_flag_mlp2=False,
+                 single_flag_mod=False,
+                 single_rank_mod=256,
+                 single_rank_mlp2=512,
+                 single_rank_attn=512,
+                 single_rank_mlp=512,
+                 double_flag_img_attn=False,
+                 double_flag_txt_attn=False,
+                 double_flag_img_mlp=False,
+                 double_flag_txt_mlp=False,
+                 double_flag_img_mod=False,
+                 double_flag_txt_mod=False,
+                 double_flag_txt_proj=False,
+                 double_flag_img_proj=False,
+                 double_rank_img_mod=256,
+                 double_rank_img_mlp=512,
+                 double_rank_img_attn=512,
+                 double_rank_txt_mod=256,
+                 double_rank_txt_mlp=512,
+                 double_rank_txt_attn=512,
+                 double_rank_txt_proj=512,
+                 double_rank_img_proj=512 
+                 ):
+    # Example modification: replace a specific layer with an Identity layer
+
+    for idx in single_blocks_comp:
+        model.single_blocks[idx] = SingleStreamBlockPruned(model.single_blocks[idx],
+                                                           rank_attn=single_rank_attn,
+                                                           rank_mlp=single_rank_mlp,
+                                                           rank_mlp2=single_rank_mlp2,
+                                                           rank_mod=single_rank_mod,
+                                                           flag_mod=single_flag_mod,
+                                                           flag_attn=single_flag_attn,
+                                                           flag_mlp=single_flag_mlp,
+                                                           flag_mlp2=single_flag_mlp2)
+    for idx in double_blocks_comp:
+        
+        model.double_blocks[idx] = DoubleStreamBlockPruned( model.double_blocks[idx],
+                                                            rank_attn_img=double_rank_img_attn,
+                                                            rank_attn_txt=double_rank_txt_attn,
+                                                            rank_img_mlp_in=double_rank_img_mlp,
+                                                            rank_img_mlp_out=double_rank_img_mlp,
+                                                            rank_txt_mlp_in=double_rank_txt_mlp,
+                                                            rank_txt_mlp_out=double_rank_txt_mlp,
+                                                            rank_img_mod=double_rank_img_mod,
+                                                            rank_txt_mod=double_rank_txt_mod,
+                                                            rank_img_proj=double_rank_img_proj,
+                                                            rank_txt_proj=double_rank_txt_proj,
+                                                            flag_img_attn=double_flag_img_attn,
+                                                            flag_txt_attn=double_flag_txt_attn,
+                                                            flag_img_mlp=double_flag_img_mlp,
+                                                            flag_txt_mlp=double_flag_txt_mlp,
+                                                            flag_img_mod=double_flag_img_mod,
+                                                            flag_txt_mod=double_flag_txt_mod,
+                                                            flag_img_proj=double_flag_img_proj,
+                                                            flag_txt_proj=double_flag_txt_proj,
+                                                            )
+    
+    for idx in double_blocks:
+        model.double_blocks[idx] = IdentityD(hidden_size=int(3072),mlp_ratio= 4.0, num_heads=int(24))
+    for idx in single_blocks:
+        model.single_blocks[idx] = Identity(hidden_size=int(3072), num_heads=int(24))
+    return model
+
+
+
+def modify_model_grasp(model,
                  double_blocks,
                  single_blocks, 
                  single_blocks_comp = [],
@@ -41,10 +115,13 @@ def modify_model(model,
         model.double_blocks[idx] = IdentityD(hidden_size=int(3072),mlp_ratio= 4.0, num_heads=int(24))
     for idx in single_blocks:
         model.single_blocks[idx] = Identity(hidden_size=int(3072), num_heads=int(24))
-    print("Modify singel blocks: ", single_blocks)
-    print(double_blocks)
+    print("Modify singel blocks: ", single_blocks_comp)
+    print(double_blocks_comp)
     for idx in single_blocks_comp:
-        model.single_blocks[idx] = SingleStreamBlockPruned(model.single_blocks[idx],
+        print("single_rank_attn", single_rank_attn)
+        print("single_rank_mlp", single_rank_mlp)
+        print("single_rank_mlp2", single_rank_mlp2)
+        model.single_blocks[idx] = SingleStreamBlockGRASPCompressed(model.single_blocks[idx],
                                                            rank_attn=single_rank_attn,
                                                            rank_mlp=single_rank_mlp,
                                                            rank_mlp2=single_rank_mlp2,
@@ -54,7 +131,7 @@ def modify_model(model,
                                                            flag_mlp=single_flag_mlp,
                                                            flag_mlp2=single_flag_mlp2)
     for idx in double_blocks_comp:
-        model.double_blocks[idx] = DoubleStreamBlockPruned( model.double_blocks[idx],
+        model.double_blocks[idx] = DoubleStreamBlockGRASPCompressed( model.double_blocks[idx],
                                                             rank_attn_img=double_rank_img_attn,
                                                             rank_attn_txt=double_rank_txt_attn,
                                                             rank_img_mlp_in=double_rank_img_mlp,
@@ -69,4 +146,49 @@ def modify_model(model,
                                                             flag_txt_mlp=double_flag_txt_mlp,
                                                             flag_img_mod=double_flag_img_mod,
                                                             flag_txt_mod=double_flag_txt_mod)
+        
     return model
+
+
+
+
+def compile_grasp_model(
+    model,
+        indices_dict: Optional[dict] = None,
+        merge: Optional[bool] = False,
+        sigma_fuse: Literal["UV", "U", "V"] = "UV",
+        device: Literal["cpu", "cuda"] = "cuda",
+        log_file: Optional[str] = None
+    ):
+        if indices_dict is None:
+            indices_dict = torch.linspace(1,100,100)
+
+        rank_dict = {}
+
+        for grasp_layer_name, indices in indices_dict.items():
+            grasp_layer: GRASPLayer = model.get_submodule(grasp_layer_name)
+
+            S = grasp_layer.S[indices]
+            U = grasp_layer.U[:, indices]
+            Vh = grasp_layer.Vh[indices, :]
+            bias = grasp_layer.bias
+
+            rank_dict[grasp_layer_name] = S.shape[0]
+
+      
+            _set_module(model, grasp_layer_name, SVDLinear(U=U, S=S, Vh=Vh, bias=bias, sigma_fuse=sigma_fuse))
+            svd_linear_layer: SVDLinear = model.get_submodule(grasp_layer_name)
+            svd_linear_layer.requires_grad_(False)
+            
+            del grasp_layer
+            if "cuda" in device:
+                torch.cuda.empty_cache()
+        return model
+    
+
+def _set_module( model, submodule_key, module):
+    tokens = submodule_key.split('.')
+    sub_model = model
+    for token in tokens[:-1]:
+        sub_model = getattr(sub_model, token)
+    setattr(sub_model, tokens[-1], module)

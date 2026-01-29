@@ -616,10 +616,13 @@ class SelfAttention(nn.Module):
 
     # this is not called from DoubleStreamBlock/SingleStreamBlock because they uses attention function directly
     def forward(self, x: Tensor, pe: Tensor) -> Tensor:
+    
         qkv = self.qkv(x)
+     
         q, k, v = rearrange(qkv, "B L (K H D) -> K B H L D", K=3, H=self.num_heads)
         q, k = self.norm(q, k, v)
         x = attention(q, k, v, pe=pe)
+  
         x = self.proj(x)
         return x
 
@@ -730,7 +733,9 @@ class DoubleStreamBlock(nn.Module):
         txt_attn, img_attn = attn[:, : txt.shape[1]], attn[:, txt.shape[1] :]
 
         # calculate the img blocks
+
         img = img + img_mod1.gate * self.img_attn.proj(img_attn)
+        
         img = img + img_mod2.gate * self.img_mlp((1 + img_mod2.scale) * self.img_norm2(img) + img_mod2.shift)
 
         # calculate the txt blocks
@@ -811,8 +816,8 @@ class SingleStreamBlock(nn.Module):
     def _forward(self, x: Tensor, vec: Tensor, pe: Tensor, txt_attention_mask: Optional[Tensor] = None) -> Tensor:
         mod, _ = self.modulation(vec)
         x_mod = (1 + mod.scale) * self.pre_norm(x) + mod.shift
+        
         qkv, mlp = torch.split(self.linear1(x_mod), [3 * self.hidden_size, self.mlp_hidden_dim], dim=-1)
-
         q, k, v = rearrange(qkv, "B L (K H D) -> K B H L D", K=3, H=self.num_heads)
         q, k = self.norm(q, k, v)
 
@@ -1036,7 +1041,6 @@ class Flux(nn.Module):
             vec = vec + self.guidance_in(timestep_embedding(guidance, 256))
         vec = vec + self.vector_in(y)
         txt = self.txt_in(txt)
-
         ids = torch.cat((txt_ids, img_ids), dim=1)
         pe = self.pe_embedder(ids)
         if block_controlnet_hidden_states is not None:
@@ -1049,6 +1053,7 @@ class Flux(nn.Module):
         if not self.blocks_to_swap:
             for block_idx, block in enumerate(self.double_blocks):
                 img, txt = block(img=img, txt=txt, vec=vec, pe=pe, txt_attention_mask=txt_attention_mask)
+                
                 if KD_flag:
                     double_block_features += (torch.cat((txt, img), 1), )
                 if block_controlnet_hidden_states is not None and controlnet_depth > 0:
@@ -1061,6 +1066,7 @@ class Flux(nn.Module):
                     single_block_features += (img, )
                 if block_controlnet_single_hidden_states is not None and controlnet_single_depth > 0:
                     img = img + block_controlnet_single_hidden_states[block_idx % controlnet_single_depth]
+
         else:
             for block_idx, block in enumerate(self.double_blocks):
                 self.offloader_double.wait_for_block(block_idx)

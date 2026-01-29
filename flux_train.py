@@ -409,6 +409,10 @@ def train(args):
         flux.enable_gradient_checkpointing(cpu_offload=args.cpu_offload_checkpointing)
     flux = flux.to("cuda")
     device = next(flux.parameters()).device
+    sd = {}
+    
+    sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
+    info = flux.load_state_dict(sd, strict=False, assign=False)
     flux = modify_model(flux, 
                         args.remove_double_blocks,
                         args.remove_single_blocks,
@@ -434,6 +438,10 @@ def train(args):
                         double_rank_txt_mod=args.double_rank_txt_mod,
                         double_rank_txt_mlp=args.double_rank_txt_mlp,
                         double_rank_txt_attn=args.double_rank_txt_attn,
+                        double_rank_img_proj=args.double_rank_img_proj,
+                        double_rank_txt_proj=args.double_rank_txt_proj,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj
                         )
     print("Model parameters: ", sum(p.numel() for p in flux.parameters()))
     
@@ -441,7 +449,7 @@ def train(args):
     sd = {}
     
     sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
-    info = flux.load_state_dict(sd, strict=False, assign=True)
+    info = flux.load_state_dict(sd, strict=False, assign=False)
     
     print("Info: ", info)
     
@@ -833,7 +841,7 @@ def train(args):
                 # Sample noise that we'll add to the latents
                 noise = torch.randn_like(latents)
                 bsz = latents.shape[0]
-
+                print("Latents", latents.shape)
                 # get noisy model input and timesteps
                 noisy_model_input, timesteps, sigmas = flux_train_utils.get_noisy_model_input_and_timesteps(
                     args, noise_scheduler_copy, latents, noise, accelerator.device, weight_dtype
@@ -843,6 +851,7 @@ def train(args):
                 packed_noisy_model_input = flux_utils.pack_latents(noisy_model_input)  # b, c, h*2, w*2 -> b, h*w, c*4
                 packed_latent_height, packed_latent_width = noisy_model_input.shape[2] // 2, noisy_model_input.shape[3] // 2
                 img_ids = flux_utils.prepare_img_ids(bsz, packed_latent_height, packed_latent_width).to(device=accelerator.device)
+                print("Patchified latents", packed_noisy_model_input.shape)
 
                 # get guidance: ensure args.guidance_scale is float
                 guidance_vec = torch.full((bsz,), float(args.guidance_scale), device=accelerator.device)

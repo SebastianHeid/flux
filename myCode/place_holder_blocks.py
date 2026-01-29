@@ -337,15 +337,19 @@ class SingleStreamBlockPruned(nn.Module):
         mod, _ = self.modulation(vec)
         x_mod = (1 + mod.scale) * self.pre_norm(x) + mod.shift
         if self.flag_mlp:
+       
             mlp =  (x_mod @ self.linear_mlp_A @ self.linear_mlp_B) + self.bias_mlp
+  
         elif self.flag_attn: 
             mlp = x_mod @ self.mlp_W.T + self.mlp_b
             
         
         if self.flag_attn:
+        
             q = (x_mod @ self.linear_q_A @ self.linear_q_B) + self.bias_q
             v = (x_mod @ self.linear_v_A @ self.linear_v_B) + self.bias_v
             k = (x_mod @ self.linear_k_A @ self.linear_k_B) + self.bias_k
+    
             q = rearrange(q, "B L (H D) -> B H L D", H=self.num_heads)
             k = rearrange(k, "B L (H D) -> B H L D", H=self.num_heads)
             v = rearrange(v, "B L (H D) -> B H L D", H=self.num_heads)
@@ -384,6 +388,7 @@ class SingleStreamBlockPruned(nn.Module):
         #output = self.linear2(torch.cat((attn, self.mlp_act(mlp)), 2))
         if self.flag_mlp2: 
             xfinal = torch.cat((attn, self.mlp_act(mlp)), 2)
+ 
             output = (xfinal @ self.linear_mlp2_A @ self.linear_mlp2_B) + self.bias_mlp2
         else: 
             output = self.linear2(torch.cat((attn, self.mlp_act(mlp)), 2))
@@ -510,7 +515,9 @@ class ModulationSVD(nn.Module):
         """
         # Low-rank linear forward pass: (silu(vec) @ B.T @ A.T)
         x = F.silu(vec)
+
         out = (x @ self.linear_A @ self.linear_B)
+
         if self.bias is not None:
             out = out + self.bias
 
@@ -657,16 +664,18 @@ class DoubleStreamBlockPruned(nn.Module):
         self, img: Tensor, txt: Tensor, vec: Tensor, pe: Tensor, txt_attention_mask: Optional[Tensor] = None
     ) -> tuple[Tensor, Tensor]:
         img_mod1, img_mod2 = self.img_mod(vec)
+
         txt_mod1, txt_mod2 = self.txt_mod(vec)
 
         # prepare image for attention
         img_modulated = self.img_norm1(img)
         img_modulated = (1 + img_mod1.scale) * img_modulated + img_mod1.shift
         if self.flag_img_attn:
+
             q = (img_modulated @ self.img_attn.linear_q_A @ self.img_attn.linear_q_B) + self.img_attn.bias_q
             v = (img_modulated @ self.img_attn.linear_v_A @ self.img_attn.linear_v_B) + self.img_attn.bias_v
             k = (img_modulated @ self.img_attn.linear_k_A @ self.img_attn.linear_k_B) + self.img_attn.bias_k
-            
+         
             img_q = rearrange(q, "B L (H D) -> B H L D", H=self.num_heads)
             img_k = rearrange(k, "B L (H D) -> B H L D", H=self.num_heads)
             img_v = rearrange(v, "B L (H D) -> B H L D", H=self.num_heads)
@@ -679,10 +688,11 @@ class DoubleStreamBlockPruned(nn.Module):
         txt_modulated = self.txt_norm1(txt)
         txt_modulated = (1 + txt_mod1.scale) * txt_modulated + txt_mod1.shift
         if self.flag_txt_attn:
+          
             q = (txt_modulated @ self.txt_attn.linear_q_A @ self.txt_attn.linear_q_B) + self.txt_attn.bias_q
             v = (txt_modulated @ self.txt_attn.linear_v_A @ self.txt_attn.linear_v_B) + self.txt_attn.bias_v
             k = (txt_modulated @ self.txt_attn.linear_k_A @ self.txt_attn.linear_k_B) + self.txt_attn.bias_k
-            
+       
             txt_q = rearrange(q, "B L (H D) -> B H L D", H=self.num_heads)
             txt_k = rearrange(k, "B L (H D) -> B H L D", H=self.num_heads)
             txt_v = rearrange(v, "B L (H D) -> B H L D", H=self.num_heads)
@@ -715,8 +725,11 @@ class DoubleStreamBlockPruned(nn.Module):
         img = img + img_mod1.gate * self.img_attn.proj(img_attn)
         
         if self.flag_img_mlp:
+      
             img_in = (1 + img_mod2.scale) * self.img_norm2(img) + img_mod2.shift
+        
             img_in = (img_in @ self.img_mlp_linear1_A @ self.img_mlp_linear1_B) + self.img_mlp_bias1
+          
             img_in = self.img_mlp_act(img_in)
 
             # --- Second Linear ---
@@ -729,8 +742,11 @@ class DoubleStreamBlockPruned(nn.Module):
         # calculate the txt blocks
         txt = txt + txt_mod1.gate * self.txt_attn.proj(txt_attn)
         if self.flag_txt_mlp:
+
             txt_in = (1 + txt_mod2.scale) * self.txt_norm2(txt) + txt_mod2.shift
+
             txt_in = (txt_in @ self.txt_mlp_linear1_A @ self.txt_mlp_linear1_B) + self.txt_mlp_bias1
+  
             txt_in = self.txt_mlp_act(txt_in)
             
             txt_in = (txt_in @ self.txt_mlp_linear2_A @ self.txt_mlp_linear2_B) +  self.txt_mlp_bias2

@@ -459,8 +459,8 @@ def get_parser(**parser_kwargs):
 
 
 if __name__ == "__main__":
-    target_height = 512  # 1024
-    target_width = 512  # 1024
+    target_height = 1024  # 1024
+    target_width = 1024  # 1024
 
     # steps = 50  # 28  # 50
     # guidance_scale = 5

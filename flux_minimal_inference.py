@@ -108,7 +108,7 @@ def denoise(
             b_img = torch.cat([img, img], dim=0)
         else:
             b_img = img
-
+   
         pred = model(
             img=b_img,
             img_ids=b_img_ids,
@@ -232,7 +232,6 @@ def generate_image(
 
     # txt2img only needs img_ids
     img_ids = flux_utils.prepare_img_ids(1, packed_latent_height, packed_latent_width)
-
     # prepare fp8 models
     if is_fp8(clip_l_dtype) and (not hasattr(clip_l, "fp8_prepared") or not clip_l.fp8_prepared):
         logger.info(f"prepare CLIP-L for fp8: set to {clip_l_dtype}, set embeddings to {torch.bfloat16}")
@@ -328,7 +327,6 @@ def generate_image(
 
     img_ids = img_ids.to(device)
     t5_attn_mask = t5_attn_mask.to(device) if args.apply_t5_attn_mask else None
-
     x = do_sample(
         accelerator,
         model,
@@ -356,7 +354,7 @@ def generate_image(
     # unpack
     x = x.float()
     x = einops.rearrange(x, "b (h w) (c ph pw) -> b c (h ph) (w pw)", h=packed_latent_height, w=packed_latent_width, ph=2, pw=2)
-
+    
     # decode
     logger.info("Decoding image...")
     ae = ae.to(device)
@@ -378,7 +376,8 @@ def generate_image(
     output_dir = args.output_dir
     os.makedirs(output_dir, exist_ok=True)
     #output_path = os.path.join(output_dir, f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-    output_path = os.path.join(output_dir, str(idx) + "_" + args.image_name )
+    # output_path = os.path.join(output_dir, str(idx) + "_" + str( args.image_name ))
+    output_path = os.path.join(output_dir, "prompt_"+str(idx)+".png")
     #output_path = os.path.join(output_dir, prompt_name + ".png" )
     img.save(output_path)
 
@@ -407,14 +406,14 @@ if __name__ == "__main__":
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--prompt", type=str, default=" A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.")
-    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/SVD/flux/image/FastFlux/single_mlp2")
+    parser.add_argument("--prompt", type=str, default="Imagine a deserted beach in Borac\u00e9ia, S\u00e3o Paulo, Brazil, with ruins of an ancient alien spacecraft stranded there for many years. The beach is surrounded by lush tropical vegetation native to Brazil, and the sun is shining brightly. The ruins of the spacecraft are visible on the sandy beach, with intricate details and symbols that suggest advanced extraterrestrial technology. The image is ultrarealistic, with no defects, and has a definition of 8K, making it incredibly detailed and immersive ")
+    parser.add_argument("--output_dir", type=str, default="")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
     parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
     parser.add_argument("--t5xxl_dtype", type=str, default=None, help="dtype for t5xxl")
     parser.add_argument("--flux_dtype", type=str, default=None, help="dtype for flux")
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--seed", type=int, default=2365238057)
     parser.add_argument("--steps", type=int, default=None, help="Number of steps. Default is 4 for schnell, 50 for dev")
     parser.add_argument("--guidance", type=float, default=3.5)
     parser.add_argument("--negative_prompt", type=str, default=None)
@@ -437,15 +436,15 @@ if __name__ == "__main__":
     parser.add_argument("--single_blocks_compress", nargs='+', type=int, default=[])
     parser.add_argument("--double_blocks_compress", nargs='+', type=int, default=[])
     #parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
-    parser.add_argument("--image_name", type=str, default="img.png")
+    parser.add_argument("--image_name", type=str, default="49eb404f37e5a5254791f2db31e0016a08f78607_2365238057.png")
     parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mod", action="store_true", help="Flag")
-    parser.add_argument("--single_rank_mod", type=int, default=256, help="rank")
-    parser.add_argument("--single_rank_mlp2", type=int, default=512, help="rank")
-    parser.add_argument("--single_rank_attn", type=int, default=512, help="rank")
-    parser.add_argument("--single_rank_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_mod", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_mlp2", type=int, default=1024, help="rank")
+    parser.add_argument("--single_rank_attn", type=int, default=1024, help="rank")
+    parser.add_argument("--single_rank_mlp", type=int, default=1024, help="rank")
     
     parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag")
     parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag")
@@ -453,6 +452,8 @@ if __name__ == "__main__":
     parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
     parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
     parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_proj", action="store_true", help="Flag")
     
     parser.add_argument("--double_rank_img_mod", type=int, default=256, help="rank")
     parser.add_argument("--double_rank_img_mlp", type=int, default=512, help="rank")
@@ -460,30 +461,37 @@ if __name__ == "__main__":
     parser.add_argument("--double_rank_txt_mod", type=int, default=256, help="rank")
     parser.add_argument("--double_rank_txt_mlp", type=int, default=512, help="rank")
     parser.add_argument("--double_rank_txt_attn", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_proj", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_proj", type=int, default=512, help="rank")
     args = parser.parse_args()
   
 
-    prompts = [
-    "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
-    "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
-    #"A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
-   "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
-   # "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background."
-]
+#     prompts = [
+#     "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
+#     "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
+#     "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
+#    "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
+#    "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background.",
+#    "portrait of a joker like the joker in batman, he is wearing the joker outfit and makeup. He holds poker cards in his hand, glitch effects cinematic lighting, film scene, optimized lighting, ray tracing, sharpened image, film grain, super high resolution 8k ",
+#    "Ultra realistic photographyMale lion roaring in front of a savanna tree National Geographic Photo, sundowner, aggressiv, Sony \u03b17 III, F 1.2 v 5",
+#    "The sharp dressed black guy sits at a table in a dimly lit jazz club, his crisp black suit perfectly tailored to his athletic frame. He wears a sleek silver watch on his wrist that catches the light as he moves. Beside him sits his stunning white wife, her blonde hair swept up in an elegant bun, wearing a formfitting black dress that accentuates her curves. As they watch the band play, the mans foot taps in time to the music while his wife sways gently in her seat. The atmosphere is lively yet intimate, the perfect backdrop for a night out on the town. The jazz musicians on stage are equally stylish, their suits and instruments gleaming under the dim lights. The black guy leans in to whisper something in his wifes ear, a smile spreading across her face. They clink their glasses together in a toast, enjoying the moment as the jazz music fills the room.",
+#     "a full body photo portrait of a Mexican beautiful girl during the Mexican revolution in 1914 after a battle, she has glowing eyes and dark hair, she is wearing ammo belts, ultra realistic, cinematic lighting, dust particles, light particles, professional portrait, hyper detailed, 8k, sony a7iii, sigma lens, professional color grade ",
+# ]
 
-    # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
-    #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
-    #           "Surreal bioluminescent forest made of glowing circuitry vines, holographic butterflies, neon moss, volumetric ethereal fog, soft blue and violet light, hyper-detailed fantasy environment, calm mystical atmosphere, ultra-wide cinematic angle",
-    #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
+#     # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
+#     #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
+#     #           "Surreal bioluminescent forest made of glowing circuitry vines, holographic butterflies, neon moss, volumetric ethereal fog, soft blue and violet light, hyper-detailed fantasy environment, calm mystical atmosphere, ultra-wide cinematic angle",
+#     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
     
     
-    with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
+    with open("/home/hd/hd_hd/hd_om233/partially_removal/block_eval/1k_prompts.json", "r") as file:
         data = json.load(file)
         
     prompts = []
     for d in data.values():
         prompts.append(d)
     
+    #prompts = [args.prompt]
     print(len(prompts))
     print(prompts[0])
     seed = args.seed
@@ -512,6 +520,16 @@ if __name__ == "__main__":
         
     print(loading_device)
     is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
+    total_params = sum(p.numel() for p in model.single_blocks[0].parameters())
+    print("single_blocks",total_params)
+    
+    total_params = sum(p.numel() for p in model.double_blocks[0].parameters())
+    print("double_blocks",total_params)
+    
+    
+ 
+    
+    
     model.eval()
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
@@ -540,15 +558,20 @@ if __name__ == "__main__":
                         double_rank_img_attn=args.double_rank_img_attn,
                         double_rank_txt_mod=args.double_rank_txt_mod,
                         double_rank_txt_mlp=args.double_rank_txt_mlp,
-                        double_rank_txt_attn=args.double_rank_txt_attn,)
+                        double_rank_txt_attn=args.double_rank_txt_attn,
+                        double_rank_img_proj=args.double_rank_img_proj,
+                        double_rank_txt_proj=args.double_rank_txt_proj,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj)
     for name, param in model.named_parameters():
         if param.is_meta:
             print(f"Meta tensor found: {name}")
     
-    # state_dict = load_file(args.ckpt_path)
-    # model.load_state_dict(state_dict, strict=False)
+    state_dict = load_file(args.ckpt_path)
+    model.load_state_dict(state_dict, strict=False)
   
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
+    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[10].parameters()))
     
     
     

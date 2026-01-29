@@ -7,9 +7,9 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12 
 #SBATCH --mem=40G  
-#SBATCH --time=4:00:00 
+#SBATCH --time=0:30:00 
 #SBATCH --export=NONE
-#SBATCH --gres=gpu:1,gpumem_per_gpu:40GB
+#SBATCH --gres=gpu:1,gpumem_per_gpu:60GB
 #SBATCH --ntasks=1    
 
 #--------------------
@@ -28,18 +28,20 @@ conda activate flux_train
 
 
 # 1) img_attn
-# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-#   --double_blocks 13 14 10 11 16 12 15 3 \
-#   --single_blocks 19 24 12 22 26 31 10 20 \
-#   --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/image/exp/double_all_red_rank \
-#   --double_flag_img_attn \
-#   --double_flag_txt_attn \
-#   --double_flag_img_mlp \
-#   --double_flag_txt_mlp \
-#   --double_flag_img_mod \
-#   --double_flag_txt_mod \
-#   --single_flag_mlp2 \
-#   --single_flag_mod \
+python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference_tests.py \
+  --double_blocks 13 \
+  --single_blocks 19 \
+  --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/image/exp/test \
+  --double_flag_img_attn \
+  --double_flag_txt_attn \
+  --double_flag_img_mlp \
+  --double_flag_txt_mlp \
+  --double_flag_img_mod \
+  --double_flag_txt_mod \
+  --single_flag_mlp2 \
+  --single_flag_mod \
+  --single_flag_mlp \
+  --single_flag_attn \
 
 #python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py --double_blocks 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/image/exp_new/double_img_attn --double_flag_img_attn
 
@@ -71,22 +73,28 @@ conda activate flux_train
 #     --double_flag_img_mod \
 #     --double_flag_txt_mod \
 
-python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/new_images2/flux_comp_d_12_s_12_KD_only_2 \
-  --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
-  --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/flux/model_compression/flux_comp_d_12_s_12_KD_only/test-step00047500.safetensors\
-   --single_blocks_compress  19 24 12 22 26 31 10 20 23 29 15 25 \
-    --single_flag_mod \
-    --single_flag_mlp2 \
-    --single_rank_mlp2 1024 \
-    --single_rank_mod 512 \
-  --double_blocks_compress  13 14 10 12 11 16 9 15 3 5 17 6 \
-    --double_flag_img_attn \
-    --double_flag_txt_attn \
-    --double_flag_img_mlp \
-    --double_flag_txt_mlp \
-    --double_flag_img_mod \
-    --double_flag_txt_mod \
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference_grasp_test.py \
+#   --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/new_images2/org \
+#   --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+#   --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+
+
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference_grasp_test.py \
+#   --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/new_images2/grasp \
+#   --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+#   --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+#   --single_blocks_compress  19 24 12 22 26 31 10 20 23 29 15 25 \
+#     --single_flag_mod \
+#     --single_flag_mlp2 \
+#     --single_rank_mlp2 1024 \
+#     --single_rank_mod 512 \
+#   --double_blocks_compress  13 14 10 12 11 16 9 15 3 5 17 6 \
+#     --double_flag_img_attn \
+#     --double_flag_txt_attn \
+#     --double_flag_img_mlp \
+#     --double_flag_txt_mlp \
+#     --double_flag_img_mod \
+#     --double_flag_txt_mod \
 
 # python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
 #   --output_dir /home/hd/hd_hd/hd_om233/SVD/flux/new_images2/flux_comp_d_12_s_12_org_loss_all_trainable \

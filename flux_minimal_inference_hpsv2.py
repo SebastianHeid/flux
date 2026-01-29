@@ -436,6 +436,8 @@ if __name__ == "__main__":
     parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
     parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
     parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_proj", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag")
     
     parser.add_argument("--double_rank_img_mod", type=int, default=256, help="rank")
     parser.add_argument("--double_rank_img_mlp", type=int, default=512, help="rank")
@@ -443,6 +445,8 @@ if __name__ == "__main__":
     parser.add_argument("--double_rank_txt_mod", type=int, default=256, help="rank")
     parser.add_argument("--double_rank_txt_mlp", type=int, default=512, help="rank")
     parser.add_argument("--double_rank_txt_attn", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_proj", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_proj", type=int, default=512, help="rank")
     
 
     args = parser.parse_args()
@@ -483,7 +487,7 @@ if __name__ == "__main__":
     model = modify_model(model,
                          args.double_blocks,
                          args.single_blocks,
-                         single_blocks_comp = args.single_blocks_compress,
+                        single_blocks_comp = args.single_blocks_compress,
                         double_blocks_comp = args.double_blocks_compress,
                         single_flag_attn=args.single_flag_attn,
                         single_flag_mlp=args.single_flag_mlp,
@@ -504,7 +508,11 @@ if __name__ == "__main__":
                         double_rank_img_attn=args.double_rank_img_attn,
                         double_rank_txt_mod=args.double_rank_txt_mod,
                         double_rank_txt_mlp=args.double_rank_txt_mlp,
-                        double_rank_txt_attn=args.double_rank_txt_attn,)
+                        double_rank_txt_attn=args.double_rank_txt_attn,
+                        double_rank_img_proj=args.double_rank_img_proj,
+                        double_rank_txt_proj=args.double_rank_txt_proj,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj)
     for name, param in model.named_parameters():
         if param.is_meta:
             print(f"Meta tensor found: {name}")
@@ -575,6 +583,7 @@ if __name__ == "__main__":
     for style, prompts in all_prompts.items():
         seed_everything(args.seed)
         
+        
         with torch.no_grad():
             for idx, prompt in enumerate(prompts):
                 # Generate images
@@ -595,7 +604,7 @@ if __name__ == "__main__":
                 if not os.path.exists(os.path.join(args.output_dir, style)):
                     os.makedirs(os.path.join(args.output_dir, style))
                 save_image(sample, os.path.join(args.output_dir, style, f"{idx:05d}.jpg"), nrow=1, normalize=True, value_range=(-1, 1))
-               
+            
 
 
 
