@@ -396,13 +396,8 @@ if __name__ == "__main__":
     device = get_preferred_device()
 
     parser = argparse.ArgumentParser()
-    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux/transformer/transformer.safetensors")
-    # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
-    # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
-    #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
     parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
@@ -440,77 +435,49 @@ if __name__ == "__main__":
     parser.add_argument("--double_blocks_compress_new", nargs='+', type=int, default=[])
     #parser.add_argument("--single_blocks", nargs='+', type=int, default=[],)
     parser.add_argument("--image_name", type=str, default="img.png")
-    parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
-    parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
-    parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
-    parser.add_argument("--single_flag_mod", action="store_true", help="Flag")
-    parser.add_argument("--single_comp_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp2",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_attn",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp",  nargs='+', type=float, default=[], help="comp")
+    parser.add_argument("--single_flag_attn", action="store_true", help="Flag Compress Attention Matrix Single Block")
+    parser.add_argument("--single_flag_mlp", action="store_true", help="Flag Compress MLP Matrix Single Block")
+    parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag Compress MLP2 Matrix Single Block")
+    parser.add_argument("--single_flag_mod", action="store_true", help="Flag Compress Modulation  Matrix Single Block")
+    parser.add_argument("--single_comp_mod",  nargs='+', type=float, default=[], help="Compression Ratios Modulation Matrix Single Blocks")
+    parser.add_argument("--single_comp_mlp2",  nargs='+', type=float, default=[], help="Compression Ratios MLP2 Matrix Single Blocks")
+    parser.add_argument("--single_comp_attn",  nargs='+', type=float, default=[], help="Compression Ratios Attention Matrix Single Blocks")
+    parser.add_argument("--single_comp_mlp",  nargs='+', type=float, default=[], help="Compression Ratios MLP Matrix Single Blocks")
     
-    parser.add_argument("--single_comp_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp2_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_attn_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp_new",  nargs='+', type=float, default=[], help="comp")
+    parser.add_argument("--single_comp_mod_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--single_comp_mlp2_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--single_comp_attn_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--single_comp_mlp_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
     
-    parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_img_mlp", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_img_proj", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag Compress Image Attention Matrix Double Block")
+    parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag Compress Text Attention Matrix Double Block")
+    parser.add_argument("--double_flag_img_mlp", action="store_true", help="Flag Compress Image MLP Matrix Double Block")
+    parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag Compress Text MLP Matrix Double Block")
+    parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag Compress Image Modulation Matrix Double Block")
+    parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag Compress Text Modulation Matrix Double Block")
+    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag Compress Image Projection Matrix Double Block")
+    parser.add_argument("--double_flag_img_proj", action="store_true", help="Flag Compress Text Projection Matrix Double Block")
     
-    parser.add_argument("--double_comp_img_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_mlp",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_attn", nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mlp",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_attn",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_proj",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_proj",  nargs='+', type=float, default=[], help="comp")
+    parser.add_argument("--double_comp_img_mod",  nargs='+', type=float, default=[], help="Compression Ratios Image Modulation Matrix Double Blocks")
+    parser.add_argument("--double_comp_img_mlp",  nargs='+', type=float, default=[], help="Compression Ratios Image MLP Matrix Double Blocks")
+    parser.add_argument("--double_comp_img_attn", nargs='+', type=float, default=[], help="Compression Ratios Image Attention Matrix Double Blocks")
+    parser.add_argument("--double_comp_txt_mod",  nargs='+', type=float, default=[], help="Compression Ratios Text Modulation Matrix Double Blocks")
+    parser.add_argument("--double_comp_txt_mlp",  nargs='+', type=float, default=[], help="Compression Ratios Text MLP Matrix Double Blocks")
+    parser.add_argument("--double_comp_txt_attn",  nargs='+', type=float, default=[], help="Compression Ratios Text Attention Matrix Double Blocks")
+    parser.add_argument("--double_comp_txt_proj",  nargs='+', type=float, default=[], help="Compression Ratios Text Projection Matrix Double Blocks")
+    parser.add_argument("--double_comp_img_proj",  nargs='+', type=float, default=[], help="Compression Ratios Image Projection Matrix Double Blocks")
     
-    parser.add_argument("--double_comp_img_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_mlp_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_attn_new", nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mlp_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_attn_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_proj_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="comp")
+    parser.add_argument("--double_comp_img_mod_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_img_mlp_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_img_attn_new", nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_txt_mod_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_txt_mlp_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_txt_attn_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_txt_proj_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
+    parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="Not Relevant for Inference")
     args = parser.parse_args()
   
-
-    prompts = [
-    "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
-    "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
-    "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
-   "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
-   "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background.",
-   "portrait of a joker like the joker in batman, he is wearing the joker outfit and makeup. He holds poker cards in his hand, glitch effects cinematic lighting, film scene, optimized lighting, ray tracing, sharpened image, film grain, super high resolution 8k ",
-   "Ultra realistic photographyMale lion roaring in front of a savanna tree National Geographic Photo, sundowner, aggressiv, Sony \u03b17 III, F 1.2 v 5",
-   "The sharp dressed black guy sits at a table in a dimly lit jazz club, his crisp black suit perfectly tailored to his athletic frame. He wears a sleek silver watch on his wrist that catches the light as he moves. Beside him sits his stunning white wife, her blonde hair swept up in an elegant bun, wearing a formfitting black dress that accentuates her curves. As they watch the band play, the mans foot taps in time to the music while his wife sways gently in her seat. The atmosphere is lively yet intimate, the perfect backdrop for a night out on the town. The jazz musicians on stage are equally stylish, their suits and instruments gleaming under the dim lights. The black guy leans in to whisper something in his wifes ear, a smile spreading across her face. They clink their glasses together in a toast, enjoying the moment as the jazz music fills the room.",
-    "a full body photo portrait of a Mexican beautiful girl during the Mexican revolution in 1914 after a battle, she has glowing eyes and dark hair, she is wearing ammo belts, ultra realistic, cinematic lighting, dust particles, light particles, professional portrait, hyper detailed, 8k, sony a7iii, sigma lens, professional color grade ",
-]
-
-#     # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
-#     #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
-#     #           "Surreal bioluminescent forest made of glowing circuitry vines, holographic butterflies, neon moss, volumetric ethereal fog, soft blue and violet light, hyper-detailed fantasy environment, calm mystical atmosphere, ultra-wide cinematic angle",
-#     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
-    
-    
-#     with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
-#         data = json.load(file)
-        
-#     prompts = []
-#     for d in data.values():
-#         prompts.append(d)
-    
-    #prompts = [args.prompt]
-    print(len(prompts))
-    print(prompts[0])
+    prompts = [args.prompt]
     seed = args.seed
     steps = args.steps
     guidance_scale = args.guidance

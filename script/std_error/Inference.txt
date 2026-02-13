@@ -1,1352 +1,0 @@
-2026-02-04 15:40:24 INFO     Dtypes for clip_l,    flux_minimal_inference.py:564
-                             t5xxl, ae, flux:                                   
-                             torch.bfloat16,                                    
-                             torch.bfloat16,                                    
-                             torch.bfloat16,                                    
-                             torch.bfloat16                                     
-                    INFO     Checking the state dict: Diffusers flux_utils.py:43
-                             or BFL, dev or schnell                             
-                    INFO     Building Flux model schnell from  flux_utils.py:101
-                             BFL checkpoint                                     
-                    INFO     Loading state dict from           flux_utils.py:118
-                             /gpfs/bwfor/work/ws/hd_om233-flux                  
-                             /flux/flux_schnell/flux1-schnell.                  
-                             safetensors                                        
-2026-02-04 15:40:56 INFO     Loaded Flux: <All keys matched    flux_utils.py:137
-                             successfully>                                      
-                    INFO     Casting model to      flux_minimal_inference.py:589
-                             torch.bfloat16                                     
-2026-02-04 15:41:06 INFO     Loading t5xxl from    flux_minimal_inference.py:634
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/model_fl                              
-                             ux/t5xxl/model.safete                              
-                             nsors...                                           
-                    INFO     Loading state dict from           flux_utils.py:330
-                             /gpfs/bwfor/work/ws/hd_om233-flux                  
-                             /model_flux/t5xxl/model.safetenso                  
-                             rs                                                 
-2026-02-04 15:41:33 INFO     Loaded T5xxl:                     flux_utils.py:333
-                             _IncompatibleKeys(missing_keys=['                  
-                             encoder.embed_tokens.weight'],                     
-                             unexpected_keys=[])                                
-                    INFO     Loading clip_l from   flux_minimal_inference.py:640
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/model_fl                              
-                             ux/clip/model.safeten                              
-                             sors...                                            
-                    INFO     Building CLIP-L                   flux_utils.py:179
-                    INFO     Loading state dict from           flux_utils.py:275
-                             /gpfs/bwfor/work/ws/hd_om233-flux                  
-                             /model_flux/clip/model.safetensor                  
-                             s                                                  
-2026-02-04 15:41:34 INFO     Loaded CLIP-L: <All keys matched  flux_utils.py:278
-                             successfully>                                      
-You are using the default legacy behaviour of the <class 'transformers.models.t5.tokenization_t5.T5Tokenizer'>. This is expected, and simply means that the `legacy` (previous) behavior will be used so nothing changes for you. If you want to use the new behaviour, set `legacy=False`. This should only be set if you understand what it means, and thoroughly read the reason why this was added as explained in https://github.com/huggingface/transformers/pull/24565
-2026-02-04 15:41:35 INFO     Building AutoEncoder              flux_utils.py:144
-                    INFO     Loading state dict from           flux_utils.py:149
-                             /gpfs/bwfor/work/ws/hd_om233-flux                  
-                             /model_flux/ae/ae.safetensors                      
-                    INFO     Loaded AE: <All keys matched      flux_utils.py:152
-                             successfully>                                      
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:41:37 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:01,  2.54it/s] 50%|█████     | 2/4 [00:00<00:00,  2.28it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.20it/s]100%|██████████| 4/4 [00:01<00:00,  2.17it/s]100%|██████████| 4/4 [00:01<00:00,  2.21it/s]
-2026-02-04 15:41:39 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:41:40 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_0.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.53it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.24it/s]100%|██████████| 4/4 [00:01<00:00,  2.35it/s]
-2026-02-04 15:41:42 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_1.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.53it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.35it/s]
-2026-02-04 15:41:44 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:41:45 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_2.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.50it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:41:47 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_3.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.50it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.35it/s]
-2026-02-04 15:41:49 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:41:50 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_4.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.50it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:41:52 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:41:53 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_5.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.32it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:41:55 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_6.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:41:57 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:41:58 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_7.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:00 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_8.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:02 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:03 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_9.png                                   
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:05 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_10.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:42:06 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:07 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:08 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_11.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:10 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:11 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_12.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:13 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_13.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:15 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:16 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_14.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:18 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_15.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.23it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:42:20 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:21 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_16.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.46it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:23 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_17.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:25 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:26 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_18.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:28 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:29 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_19.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:31 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_20.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:33 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:34 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_21.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:36 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:37 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_22.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:39 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_23.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:41 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:42 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_24.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:44 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_25.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:42:45 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:46 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:47 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_26.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:49 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:50 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_27.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:52 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_28.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:54 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:42:55 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_29.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:42:57 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_30.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:42:58 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:00 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_31.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:02 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:03 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_32.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:05 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_33.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:07 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:08 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_34.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:10 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_35.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:12 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:13 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_36.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:15 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_37.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:17 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:18 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_38.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:43:20 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:21 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_39.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:23 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_40.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:25 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:26 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_41.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:28 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_42.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:30 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:31 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_43.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:33 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_44.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:35 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:36 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_45.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.50it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:38 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_46.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:40 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:41 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_47.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:43 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_48.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:43:44 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:46 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_49.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:48 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:49 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_50.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:51 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_51.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:53 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:43:54 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_52.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:56 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_53.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:43:57 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:43:59 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_54.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:01 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:02 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_55.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:04 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_56.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.50it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:06 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:07 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_57.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:09 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:10 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_58.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:12 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_59.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:14 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:15 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_60.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:17 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_61.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:19 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:20 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_62.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:22 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_63.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-2026-02-04 15:44:23 INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:24 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:25 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_64.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:27 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_65.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:44:28 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:29 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:30 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_66.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:32 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:33 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_67.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:35 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_68.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:37 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:38 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_69.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:40 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_70.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:42 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:43 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_71.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:45 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_72.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:47 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:48 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_73.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:50 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_74.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:44:51 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:52 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:53 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_75.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:44:55 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:44:56 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_76.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:44:58 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_77.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:00 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:01 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_78.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:03 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_79.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:45:04 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:06 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_80.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:08 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:09 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_81.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:11 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_82.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:13 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:14 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_83.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:16 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:17 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_84.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:19 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_85.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.34it/s]
-2026-02-04 15:45:21 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:22 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_86.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:24 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_87.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:26 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:27 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_88.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:29 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_89.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:45:30 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:31 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:32 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_90.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:34 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_91.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:45:35 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:37 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_92.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:39 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_93.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:45:40 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:42 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_94.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.47it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:44 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:45 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_95.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.49it/s] 50%|█████     | 2/4 [00:00<00:00,  2.52it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:47 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_96.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:49 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:50 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_97.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-                    INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.31it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:52 INFO     Decoding image...     flux_minimal_inference.py:413
-                    INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_98.png                                  
-                    INFO     Seed: 2365238057      flux_minimal_inference.py:265
-                    INFO     Encoding prompts...   flux_minimal_inference.py:325
-2026-02-04 15:45:53 INFO     Generating image...   flux_minimal_inference.py:371
-                    INFO     num_steps: 4          flux_minimal_inference.py:206
-                    INFO     guidance: 3.5,         flux_minimal_inference.py:83
-                             cfg_scale: 1.0                                     
-  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.48it/s] 50%|█████     | 2/4 [00:00<00:00,  2.51it/s] 75%|███████▌  | 3/4 [00:01<00:00,  2.30it/s]100%|██████████| 4/4 [00:01<00:00,  2.22it/s]100%|██████████| 4/4 [00:01<00:00,  2.33it/s]
-2026-02-04 15:45:54 INFO     Decoding image...     flux_minimal_inference.py:413
-2026-02-04 15:45:55 INFO     Saved image to        flux_minimal_inference.py:438
-                             /gpfs/bwfor/work/ws/h                              
-                             d_om233-flux/flux/ima                              
-                             ge/flux_schnell/origi                              
-                             nal/prompt_99.png                                  
-                    INFO     Done!                 flux_minimal_inference.py:778
-                    INFO     Done!                 flux_minimal_inference.py:779

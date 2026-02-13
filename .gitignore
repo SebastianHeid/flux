@@ -8,8 +8,6 @@ build
 wandb
 
 new_images2/
-train_script/
-script/
 Optuna_helper/
 block_analysis_it_1k/
 block_analysis_it/
