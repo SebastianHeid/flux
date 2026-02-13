@@ -633,7 +633,7 @@ if __name__ == "__main__":
                 args.cfg_scale
             )
                 
-                save_image(sample, os.path.join(sample_path, f"{sample_count:05}.png"), nrow=1, normalize=True, value_range=(-1, 1))
+                save_image(sample, os.path.join(sample_path, f"{sample_count:05}.jpeg"), nrow=1, normalize=True, value_range=(-1, 1))
                 sample_count += 1
                
 

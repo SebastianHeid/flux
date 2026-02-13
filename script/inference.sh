@@ -7,7 +7,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12 
 #SBATCH --mem=40G  
-#SBATCH --time=24:00:00 
+#SBATCH --time=1:00:00 
 #SBATCH --export=NONE
 #SBATCH --gres=gpu:A100:1
 #SBATCH --ntasks=1    
@@ -62,17 +62,43 @@ export LD_LIBRARY_PATH=/usr/local/cuda-12.6/lib64:$LD_LIBRARY_PATH
 
 # # ---------------------- how strong to compress ----------------------------------
 
-# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/MJHQ_30k/original_model/ \
-
-
 python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
-  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_analysis_it_1k/original \
-  --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
+  --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/flux_schnell/original/ \
+    --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors  \
+  --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors  \
+    --double_blocks_compress 13 14 10 12 11 16 9 15 3 5 17 6 4 7 8 18 1 0 \
+    --double_flag_img_attn \
+    --double_flag_txt_attn \
+    --double_flag_img_mlp \
+    --double_flag_txt_mlp \
+    --double_flag_img_mod \
+    --double_flag_txt_mod \
+    --double_rank_img_mod 526  \
+    --double_rank_img_mlp 491 \
+    --double_rank_img_attn 307 \
+    --double_rank_txt_mod 526 \
+    --double_rank_txt_mlp 491 \
+    --double_rank_txt_attn 307 \
+    --single_flag_mod \
+    --single_flag_attn \
+    --single_flag_mlp2 \
+    --single_flag_mlp \
+     --single_rank_attn 307 \
+    --single_rank_mlp 491 \
+    --single_rank_mlp2 511 \
+    --single_rank_mod 460 \
+
+
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_analysis_it_1k/original \
+#   --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors \
 
     
 
-
+# python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
+#   --output_dir /home/hd/hd_hd/hd_om233/SVD/images/flux_schnell \
+#   --ckpt_path /gpfs/bwfor/work/ws/hd_om233-flux/flux/flux_schnell/flux1-schnell.safetensors \
+#   --ckpt_path_org /gpfs/bwfor/work/ws/hd_om233-flux/flux/flux_schnell/flux1-schnell.safetensors \
 
 # python /home/hd/hd_hd/hd_om233/SVD/flux/flux_minimal_inference.py \
 #   --output_dir /gpfs/bwfor/work/ws/hd_om233-flux/flux/MJHQ_30k/flux_train_Grasp/flux_d_18/ \

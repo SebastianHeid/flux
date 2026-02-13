@@ -108,7 +108,9 @@ def denoise(
             b_img = torch.cat([img, img], dim=0)
         else:
             b_img = img
-   
+
+        
+        
         pred = model(
             img=b_img,
             img_ids=b_img_ids,
@@ -119,6 +121,58 @@ def denoise(
             guidance=guidance_vec,
             txt_attention_mask=b_t5_attn_mask,
         )
+        
+        # torch.cuda.reset_peak_memory_stats()
+        # torch.cuda.empty_cache()
+
+        # # 2. Inferenz ausführen
+        # with torch.no_grad():
+        #     pred = model(
+        #         img=b_img,
+        #         img_ids=b_img_ids,
+        #         txt=b_txt,
+        #         txt_ids=b_txt_ids,
+        #         y=b_vec,
+        #         timesteps=t_vec,
+        #         guidance=guidance_vec,
+        #         txt_attention_mask=b_t5_attn_mask,
+        #     )
+
+        # # 3. Peak VRAM auslesen
+        # peak_memory_bytes = torch.cuda.max_memory_allocated()
+        # peak_memory_gb = peak_memory_bytes / (1024 ** 3)
+
+        # print(f"Maximal genutzter VRAM: {peak_memory_gb:.2f} GB")
+        
+        # starter, ender = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+        # repetitions = 100
+        # timings = []
+
+        # with torch.no_grad():
+        #     for _ in range(repetitions):
+        #         starter.record()
+                
+        #         # Der eigentliche Inferenzschritt
+        #         pred = model(
+        #             img=b_img,
+        #             img_ids=b_img_ids,
+        #             txt=b_txt,
+        #             txt_ids=b_txt_ids,
+        #             y=b_vec,
+        #             timesteps=t_vec,
+        #             guidance=guidance_vec,
+        #             txt_attention_mask=b_t5_attn_mask,
+        #         )
+                
+        #         ender.record()
+                
+        #         # Auf die GPU warten (Synchronisation)
+        #         torch.cuda.synchronize()
+        #         curr_time = starter.elapsed_time(ender) # Zeit in Millisekunden
+        #         timings.append(curr_time)
+
+        # avg_time = sum(timings) / repetitions
+        # print(f"Durchschnittliche Latenz pro Schritt: {avg_time:.2f} ms")
 
         # classifier free guidance
         if neg_txt is not None and neg_vec is not None:
@@ -484,7 +538,7 @@ if __name__ == "__main__":
 #     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
     
     
-    with open("/home/hd/hd_hd/hd_om233/partially_removal/block_eval/1k_prompts.json", "r") as file:
+    with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
         data = json.load(file)
         
     prompts = []
@@ -522,6 +576,7 @@ if __name__ == "__main__":
     is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
     total_params = sum(p.numel() for p in model.single_blocks[0].parameters())
     print("single_blocks",total_params)
+    print("Is schnell", is_schnell)
     
     total_params = sum(p.numel() for p in model.double_blocks[0].parameters())
     print("double_blocks",total_params)
@@ -571,8 +626,8 @@ if __name__ == "__main__":
     model.load_state_dict(state_dict, strict=False)
   
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
-    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[10].parameters()))
-    
+    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[13].parameters()))
+    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[14].parameters()))
     
     
 

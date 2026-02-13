@@ -10,18 +10,15 @@ from typing import Callable, List, Optional
 
 import accelerate
 import einops
-import hpsv2
 import numpy as np
 import torch
 from library import device_utils
 from library.device_utils import get_preferred_device, init_ipex
-from myCode.modify_model_iterative import modify_model, modify_model_it
+from myCode.modify_model_iterative_optimized import modify_model, modify_model_it
 from networks import oft_flux
 from PIL import Image
-from pytorch_lightning import seed_everything
 from safetensors.torch import load_file
-from torchvision.utils import save_image
-from tqdm import tqdm, trange
+from tqdm import tqdm
 from transformers import CLIPTextModel, T5EncoderModel
 
 init_ipex()
@@ -205,8 +202,10 @@ def generate_image(
     image_height: int,
     steps: Optional[int],
     guidance: float,
+    negative_prompt: Optional[str],
     cfg_scale: float,
-    negative_prompt: str,
+    idx: int,
+    prompt_name: str = None,
 ):
     seed = seed if seed is not None else random.randint(0, 2**32 - 1)
     logger.info(f"Seed: {seed}")
@@ -296,6 +295,7 @@ def generate_image(
                     )
         return l_pooled, t5_out, txt_ids, t5_attn_mask
 
+    print("prompt: ", prompt)
     l_pooled, t5_out, txt_ids, t5_attn_mask = encode(prompt)
     if negative_prompt:
         neg_l_pooled, neg_t5_out, _, neg_t5_attn_mask = encode(negative_prompt)
@@ -370,11 +370,19 @@ def generate_image(
     if args.offload:
         ae = ae.cpu()
 
-    # x = x.clamp(-1, 1)
-    # x = x.permute(0, 2, 3, 1)
-    # img = Image.fromarray((127.5 * (x + 1.0)).float().cpu().numpy().astype(np.uint8)[0])
+    x = x.clamp(-1, 1)
+    x = x.permute(0, 2, 3, 1)
+    img = Image.fromarray((127.5 * (x + 1.0)).float().cpu().numpy().astype(np.uint8)[0])
 
-    return x
+    # save image
+    output_dir = args.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+    #output_path = os.path.join(output_dir, f"{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
+    output_path = os.path.join(output_dir, str(idx) + "_" + str( args.image_name ))
+    #output_path = os.path.join(output_dir, prompt_name + ".png" )
+    img.save(output_path)
+
+    logger.info(f"Saved image to {output_path}")
 
 
 if __name__ == "__main__":
@@ -388,13 +396,19 @@ if __name__ == "__main__":
     device = get_preferred_device()
 
     parser = argparse.ArgumentParser()
+    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux/transformer/transformer.safetensors")
+    # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
+    # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
+    #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
     parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
+    parser.add_argument("--prompt", type=str, default="Photorealistic, front of escape room, marketing photo, sunset, beautiful photo ")
+    parser.add_argument("--output_dir", type=str, default="")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
     parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
@@ -403,8 +417,8 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=None, help="Number of steps. Default is 4 for schnell, 50 for dev")
     parser.add_argument("--guidance", type=float, default=3.5)
-    parser.add_argument("--cfg_scale", type=float, default=1.0)
     parser.add_argument("--negative_prompt", type=str, default=None)
+    parser.add_argument("--cfg_scale", type=float, default=1.0)
     parser.add_argument("--offload", action="store_true", help="Offload to CPU")
     parser.add_argument(
         "--lora_weights",
@@ -417,10 +431,15 @@ if __name__ == "__main__":
     parser.add_argument("--width", type=int, default=target_width)
     parser.add_argument("--height", type=int, default=target_height)
     parser.add_argument("--interactive", action="store_true")
-    parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
+    #parser.add_argument("--double_blocks", nargs='+', type=int, default=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17])
     parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
+    parser.add_argument("--double_blocks", nargs='+', type=int, default=[])
     parser.add_argument("--single_blocks_compress", nargs='+', type=int, default=[])
     parser.add_argument("--double_blocks_compress", nargs='+', type=int, default=[])
+    parser.add_argument("--single_blocks_compress_new", nargs='+', type=int, default=[])
+    parser.add_argument("--double_blocks_compress_new", nargs='+', type=int, default=[])
+    #parser.add_argument("--single_blocks", nargs='+', type=int, default=[],)
+    parser.add_argument("--image_name", type=str, default="img.png")
     parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
@@ -461,12 +480,37 @@ if __name__ == "__main__":
     parser.add_argument("--double_comp_txt_attn_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--double_comp_txt_proj_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="comp")
-
     args = parser.parse_args()
   
 
-    all_prompts =  hpsv2.benchmark_prompts('all')  
+    prompts = [
+    "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
+    "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
+    "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
+   "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
+   "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background.",
+   "portrait of a joker like the joker in batman, he is wearing the joker outfit and makeup. He holds poker cards in his hand, glitch effects cinematic lighting, film scene, optimized lighting, ray tracing, sharpened image, film grain, super high resolution 8k ",
+   "Ultra realistic photographyMale lion roaring in front of a savanna tree National Geographic Photo, sundowner, aggressiv, Sony \u03b17 III, F 1.2 v 5",
+   "The sharp dressed black guy sits at a table in a dimly lit jazz club, his crisp black suit perfectly tailored to his athletic frame. He wears a sleek silver watch on his wrist that catches the light as he moves. Beside him sits his stunning white wife, her blonde hair swept up in an elegant bun, wearing a formfitting black dress that accentuates her curves. As they watch the band play, the mans foot taps in time to the music while his wife sways gently in her seat. The atmosphere is lively yet intimate, the perfect backdrop for a night out on the town. The jazz musicians on stage are equally stylish, their suits and instruments gleaming under the dim lights. The black guy leans in to whisper something in his wifes ear, a smile spreading across her face. They clink their glasses together in a toast, enjoying the moment as the jazz music fills the room.",
+    "a full body photo portrait of a Mexican beautiful girl during the Mexican revolution in 1914 after a battle, she has glowing eyes and dark hair, she is wearing ammo belts, ultra realistic, cinematic lighting, dust particles, light particles, professional portrait, hyper detailed, 8k, sony a7iii, sigma lens, professional color grade ",
+]
 
+#     # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
+#     #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
+#     #           "Surreal bioluminescent forest made of glowing circuitry vines, holographic butterflies, neon moss, volumetric ethereal fog, soft blue and violet light, hyper-detailed fantasy environment, calm mystical atmosphere, ultra-wide cinematic angle",
+#     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
+    
+    
+#     with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
+#         data = json.load(file)
+        
+#     prompts = []
+#     for d in data.values():
+#         prompts.append(d)
+    
+    #prompts = [args.prompt]
+    print(len(prompts))
+    print(prompts[0])
     seed = args.seed
     steps = args.steps
     guidance_scale = args.guidance
@@ -497,6 +541,7 @@ if __name__ == "__main__":
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
     print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
+    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[13].parameters()))
     model = modify_model(model,
                          args.double_blocks,
                          args.single_blocks,
@@ -530,10 +575,43 @@ if __name__ == "__main__":
         if param.is_meta:
             print(f"Meta tensor found: {name}")
     
-    if args.ckpt_path != args.ckpt_path_org:
-        state_dict = load_file(args.ckpt_path)
-        model.load_state_dict(state_dict)
+    state_dict = load_file(args.ckpt_path)
+    model.load_state_dict(state_dict, strict=False)
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
+    model = modify_model_it(model,
+                         args.double_blocks,
+                         args.single_blocks,
+                         single_blocks_comp = args.single_blocks_compress,
+                        double_blocks_comp = args.double_blocks_compress,
+                        single_blocks_comp_new = args.single_blocks_compress_new,
+                        double_blocks_comp_new = args.double_blocks_compress_new,
+                        single_flag_attn=args.single_flag_attn,
+                        single_flag_mlp=args.single_flag_mlp,
+                        single_flag_mlp2=args.single_flag_mlp2,
+                        single_flag_mod=args.single_flag_mod,
+                        single_comp_mod=args.single_comp_mod_new,
+                        single_comp_mlp2=args.single_comp_mlp2_new,
+                        single_comp_attn=args.single_comp_attn_new,
+                        single_comp_mlp=args.single_comp_mlp_new,
+                        double_flag_img_attn=args.double_flag_img_attn,
+                        double_flag_txt_attn=args.double_flag_txt_attn,
+                        double_flag_img_mlp= args.double_flag_img_mlp,
+                        double_flag_txt_mlp=args.double_flag_txt_mlp,
+                        double_flag_img_mod=args.double_flag_img_mod,
+                        double_flag_txt_mod=args.double_flag_txt_mod,   
+                        double_comp_img_mod=args.double_comp_img_mod_new,
+                        double_comp_img_mlp=args.double_comp_img_mlp_new,
+                        double_comp_img_attn=args.double_comp_img_attn_new,
+                        double_comp_txt_mod=args.double_comp_txt_mod_new,
+                        double_comp_txt_mlp=args.double_comp_txt_mlp_new,
+                        double_comp_txt_attn=args.double_comp_txt_attn_new,
+                        double_comp_img_proj=args.double_comp_img_proj_new,
+                        double_comp_txt_proj=args.double_comp_txt_proj_new,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj)
+  
+    print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
+    print("Number params blocks_: ", sum(p.numel() for p in model.double_blocks[13].parameters()))
     
     
     
@@ -548,7 +626,22 @@ if __name__ == "__main__":
     clip_l = flux_utils.load_clip_l(args.clip_l, clip_l_dtype, loading_device)
     clip_l.eval()
 
+    
 
+    # if is_fp8(clip_l_dtype):
+    #     clip_l = accelerator.prepare(clip_l)
+    # if is_fp8(t5xxl_dtype):
+    #     t5xxl = accelerator.prepare(t5xxl)
+
+    # DiT
+    # is_schnell, model = flux_utils.load_flow_model(args.ckpt_path, None, loading_device)
+    # model.eval()
+    # logger.info(f"Casting model to {flux_dtype}")
+    # model.to(flux_dtype)  # make sure model is dtype
+    # if is_fp8(flux_dtype):
+    #     model = accelerator.prepare(model)
+    #     if args.offload:
+    #         model = model.to("cpu")
 
     t5xxl_max_length = 256 if is_schnell else 512
     tokenize_strategy = strategy_flux.FluxTokenizeStrategy(t5xxl_max_length)
@@ -593,17 +686,11 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
-    for style, prompts in all_prompts.items():
-        seed_everything(args.seed)
-        
-        
-        with torch.no_grad():
-            for idx, prompt in enumerate(prompts):
-                # Generate images
-                if os.path.exists(os.path.join(args.output_dir, style, f"{idx:05d}.jpg")):
-                    print(f"Skipping {style}, already exists in {args.output_dir}")
-                    continue
-                sample = generate_image(
+    if not args.interactive:
+        #for idx, (prompt_name,  prompt) in enumerate(prompts.items()):
+        for idx, prompt in enumerate(prompts):
+            print(prompt)
+            generate_image(
                 model,
                 clip_l,
                 t5xxl,
@@ -614,14 +701,64 @@ if __name__ == "__main__":
                 args.height,
                 args.steps,
                 args.guidance,
+                args.negative_prompt,
                 args.cfg_scale,
-                args.negative_prompt
+                idx,
+              #  prompt_name = prompt_name
+              prompt_name="image"
             )
-                if not os.path.exists(os.path.join(args.output_dir, style)):
-                    os.makedirs(os.path.join(args.output_dir, style))
-                save_image(sample, os.path.join(args.output_dir, style, f"{idx:05d}.jpg"), nrow=1, normalize=True, value_range=(-1, 1))
-            
+    else:
+        # loop for interactive
+        width = target_width
+        height = target_height
+        steps = None
+        guidance = args.guidance
+        cfg_scale = args.cfg_scale
 
+        while True:
+            print(
+                "Enter prompt (empty to exit). Options: --w <width> --h <height> --s <steps> --d <seed> --g <guidance> --m <multipliers for LoRA>"
+                " --n <negative prompt>, `-` for empty negative prompt --c <cfg_scale>"
+            )
+            prompt = input()
+            if prompt == "":
+                break
 
+            # parse options
+            options = prompt.split("--")
+            prompt = options[0].strip()
+            seed = None
+            negative_prompt = None
+            for opt in options[1:]:
+                try:
+                    opt = opt.strip()
+                    if opt.startswith("w"):
+                        width = int(opt[1:].strip())
+                    elif opt.startswith("h"):
+                        height = int(opt[1:].strip())
+                    elif opt.startswith("s"):
+                        steps = int(opt[1:].strip())
+                    elif opt.startswith("d"):
+                        seed = int(opt[1:].strip())
+                    elif opt.startswith("g"):
+                        guidance = float(opt[1:].strip())
+                    elif opt.startswith("m"):
+                        mutipliers = opt[1:].strip().split(",")
+                        if len(mutipliers) != len(lora_models):
+                            logger.error(f"Invalid number of multipliers, expected {len(lora_models)}")
+                            continue
+                        for i, lora_model in enumerate(lora_models):
+                            lora_model.set_multiplier(float(mutipliers[i]))
+                    elif opt.startswith("n"):
+                        negative_prompt = opt[1:].strip()
+                        if negative_prompt == "-":
+                            negative_prompt = ""
+                    elif opt.startswith("c"):
+                        cfg_scale = float(opt[1:].strip())
+                except ValueError as e:
+                    logger.error(f"Invalid option: {opt}, {e}")
 
+            generate_image(model, clip_l, t5xxl, ae, prompt, seed, width, height, steps, guidance, negative_prompt, cfg_scale)
+
+    logger.info("Done!")
     logger.info("Done!")

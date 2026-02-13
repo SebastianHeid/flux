@@ -1,11 +1,17 @@
+# training with captions
+
+# Swap blocks between CPU and GPU:
+# This implementation is inspired by and based on the work of 2kpr.
+# Many thanks to 2kpr for the original concept and implementation of memory-efficient offloading.
+# The original idea has been adapted and extended to fit the current project's needs.
+
 import argparse
 import copy
 import gc
 import math
 import os
-import json
 import sys
-from safetensors.torch import load_file
+from library.utils import load_safetensors
 # Key features:
 # - CPU offloading during forward and backward passes
 # - Use of fused optimizer and grad_hook for efficient gradient processing
@@ -18,17 +24,14 @@ from typing import List, Optional, Tuple, Union
 import toml
 import torch
 import torch.nn as nn
-from safetensors.torch import save_file
-# Add the correct SVD/flux directory at the front
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-# Or explicitly:
-sys.path.insert(0, "/home/hd/hd_hd/hd_om233/SVD/flux")
 from library import utils
-from myCode.modify_model import modify_model_grasp
 from library.device_utils import clean_memory_on_device, init_ipex
-from library.utils import load_safetensors
-from myCode.normalize_feature_loss import normalized_feature_distillation_loss
+from myCode.normalize_feature_loss import (
+    compute_color_consistency_loss,
+    normalization_feature_loss,
+    normalize_feature_loss,
+    normalized_feature_distillation_loss,
+)
 from tqdm import tqdm
 
 init_ipex()
@@ -44,7 +47,7 @@ from library import (
 )
 from library.sd3_train_utils import FlowMatchEulerDiscreteScheduler
 from library.utils import add_logging_arguments, setup_logging
-from myCode.modify_model import modify_model
+from myCode.modify_model_iterative import modify_model, modify_model_it
 
 setup_logging()
 import logging
@@ -56,7 +59,6 @@ import time
 
 import library.config_util as config_util
 import torch
-from GRASP.modeling_grasp import GRASPBaseModel
 
 # import library.sdxl_train_util as sdxl_train_util
 from library.config_util import BlueprintGenerator, ConfigSanitizer
@@ -179,9 +181,7 @@ def release_gpu_memory(tensors, device_id=0):
 
 
 
-
-
-def main(args):
+def train(args):
     train_util.verify_training_args(args)
     train_util.prepare_dataset_args(args, True)
     # sdxl_train_util.verify_sdxl_training_args(args)
@@ -404,42 +404,123 @@ def main(args):
     _, flux = flux_utils.load_flow_model(
         args.pretrained_model_name_or_path, weight_dtype, "cpu", args.disable_mmap_load_safetensors
     )
+
+    if args.gradient_checkpointing:
+        flux.enable_gradient_checkpointing(cpu_offload=args.cpu_offload_checkpointing)
+    device = next(flux.parameters()).device
+    flux = flux.to("cpu")
     
-    flux = modify_model_grasp(flux,
+    print("Load pruned model weights before modifying")
+    sd = {}
+    
+    sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
+    info = flux.load_state_dict(sd, strict=False, assign=False)
+    
+    print("Info: ", info)
+    flux = flux.to("cuda")
+    
+    flux = modify_model(flux,
                          args.double_blocks,
                          args.single_blocks,
-                        single_blocks_comp = args.single_blocks_compress,
-                        double_blocks_comp = args.double_blocks_compress,
+                        single_blocks_comp = args.compress_single_blocks,
+                        double_blocks_comp = args.compress_double_blocks,
                         single_flag_attn=args.single_flag_attn,
                         single_flag_mlp=args.single_flag_mlp,
                         single_flag_mlp2=args.single_flag_mlp2,
                         single_flag_mod=args.single_flag_mod,
-                        single_rank_mod=args.single_rank_mod,
-                        single_rank_mlp2=args.single_rank_mlp2,
-                        single_rank_attn=args.single_rank_attn,
-                        single_rank_mlp=args.single_rank_mlp,
+                        single_comp_mod=args.single_comp_mod,
+                        single_comp_mlp2=args.single_comp_mlp2,
+                        single_comp_attn=args.single_comp_attn,
+                        single_comp_mlp=args.single_comp_mlp,
                         double_flag_img_attn=args.double_flag_img_attn,
                         double_flag_txt_attn=args.double_flag_txt_attn,
                         double_flag_img_mlp= args.double_flag_img_mlp,
                         double_flag_txt_mlp=args.double_flag_txt_mlp,
                         double_flag_img_mod=args.double_flag_img_mod,
                         double_flag_txt_mod=args.double_flag_txt_mod,   
-                        double_rank_img_mod=args.double_rank_img_mod,
-                        double_rank_img_mlp=args.double_rank_img_mlp,
-                        double_rank_img_attn=args.double_rank_img_attn,
-                        double_rank_txt_mod=args.double_rank_txt_mod,
-                        double_rank_txt_mlp=args.double_rank_txt_mlp,
-                        double_rank_txt_attn=args.double_rank_txt_attn,)
+                        double_comp_img_mod=args.double_comp_img_mod,
+                        double_comp_img_mlp=args.double_comp_img_mlp,
+                        double_comp_img_attn=args.double_comp_img_attn,
+                        double_comp_txt_mod=args.double_comp_txt_mod,
+                        double_comp_txt_mlp=args.double_comp_txt_mlp,
+                        double_comp_txt_attn=args.double_comp_txt_attn,
+                        double_comp_img_proj=args.double_comp_img_proj,
+                        double_comp_txt_proj=args.double_comp_txt_proj,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj)
     for name, param in flux.named_parameters():
         if param.is_meta:
             print(f"Meta tensor found: {name}")
     
-    state_dict = load_file(args.pruned_model_path)
-    missing_keys, unexpected_keys = flux.load_state_dict(state_dict, strict=False)
+    sd = {}
     
-    print("Missing keys (layers in model but not in state_dict):", missing_keys)
-    print("Unexpected keys (weights in state_dict but not in model):", unexpected_keys)
+    sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
+    info = flux.load_state_dict(sd, strict=False, assign=False)
     
+    flux = modify_model_it(flux,
+                         args.double_blocks,
+                         args.single_blocks,
+                         single_blocks_comp = args.compress_single_blocks,
+                        double_blocks_comp = args.compress_double_blocks,
+                        single_blocks_comp_new = args.compress_single_blocks_new,
+                        double_blocks_comp_new = args.compress_double_blocks_new,
+                        single_flag_attn=args.single_flag_attn,
+                        single_flag_mlp=args.single_flag_mlp,
+                        single_flag_mlp2=args.single_flag_mlp2,
+                        single_flag_mod=args.single_flag_mod,
+                        single_comp_mod=args.single_comp_mod_new,
+                        single_comp_mlp2=args.single_comp_mlp2_new,
+                        single_comp_attn=args.single_comp_attn_new,
+                        single_comp_mlp=args.single_comp_mlp_new,
+                        double_flag_img_attn=args.double_flag_img_attn,
+                        double_flag_txt_attn=args.double_flag_txt_attn,
+                        double_flag_img_mlp= args.double_flag_img_mlp,
+                        double_flag_txt_mlp=args.double_flag_txt_mlp,
+                        double_flag_img_mod=args.double_flag_img_mod,
+                        double_flag_txt_mod=args.double_flag_txt_mod,   
+                        double_comp_img_mod=args.double_comp_img_mod_new,
+                        double_comp_img_mlp=args.double_comp_img_mlp_new,
+                        double_comp_img_attn=args.double_comp_img_attn_new,
+                        double_comp_txt_mod=args.double_comp_txt_mod_new,
+                        double_comp_txt_mlp=args.double_comp_txt_mlp_new,
+                        double_comp_txt_attn=args.double_comp_txt_attn_new,
+                        double_comp_img_proj=args.double_comp_img_proj_new,
+                        double_comp_txt_proj=args.double_comp_txt_proj_new,
+                        double_flag_txt_proj=args.double_flag_txt_proj,
+                        double_flag_img_proj=args.double_flag_img_proj)
+  
+    print("Model parameters: ", sum(p.numel() for p in flux.parameters()))
+    print("Load pruned model weights after modifying")
+ 
+    
+    
+    flux.requires_grad_(True)
+    if args.partially_trainable_model:
+        flux.requires_grad_(False)
+        for block_num in args.trainable_single_blocks:
+            for param in flux.single_blocks[block_num].parameters():
+                param.requires_grad = True
+       
+        for block_num in args.trainable_double_blocks:
+            for param in flux.double_blocks[block_num].parameters():
+                param.requires_grad = True
+
+    if args.freeze_double_blocks:
+        for block_num in range(len(flux.double_blocks)):
+            for param in flux.double_blocks[block_num].parameters():
+                param.requires_grad = False
+
+    # laod reference FLUX if KD True
+    print("LoaD REF MODEL")
+    if args.KD_flag:
+        _, ref_flux = flux_utils.load_flow_model(
+            args.pretrained_ref_model_name_or_path, weight_dtype, "cpu", args.disable_mmap_load_safetensors
+        )
+        ref_flux.requires_grad_(False)
+        
+    # block swap
+
+    # backward compatibility
     print("Block Swapping")
     if args.blocks_to_swap is None:
         blocks_to_swap = args.double_blocks_to_swap or 0
@@ -462,6 +543,8 @@ def main(args):
         # This idea is based on 2kpr's great work. Thank you!
         logger.info(f"enable block swap: blocks_to_swap={args.blocks_to_swap}")
         flux.enable_block_swap(args.blocks_to_swap, accelerator.device)
+        if args.KD_flag:
+            ref_flux.enable_block_swap(args.blocks_to_swap, accelerator.device)
 
     if not cache_latents:
         # load VAE here if not cached
@@ -585,7 +668,8 @@ def main(args):
         ), "full_fp16 requires mixed precision='fp16' / full_fp16mixed_precision='fp16"
         accelerator.print("enable full fp16 training.")
         flux.to(weight_dtype)
-
+        if args.KD_flag:
+            ref_flux.to(weight_dtype)
         if clip_l is not None:
             clip_l.to(weight_dtype)
             t5xxl.to(weight_dtype)  # TODO check works with fp16 or not
@@ -595,6 +679,8 @@ def main(args):
         ), "full_bf16 requires mixed precision='bf16' / full_bf16mixed_precision='bf16'"
         accelerator.print("enable full bf16 training.")
         flux.to(weight_dtype)
+        if args.KD_flag:
+            ref_flux.to(weight_dtype)
         if clip_l is not None:
             clip_l.to(weight_dtype)
             t5xxl.to(weight_dtype)
@@ -618,10 +704,14 @@ def main(args):
         # accelerator does some magic
         # if we doesn't swap blocks, we can move the model to device
         flux = accelerator.prepare(flux, device_placement=[not is_swapping_blocks])
-
+        if args.KD_flag:
+            ref_flux = accelerator.prepare(ref_flux, device_placement=[not is_swapping_blocks])
         if is_swapping_blocks:
             accelerator.unwrap_model(flux).move_to_device_except_swap_blocks(accelerator.device)  # reduce peak memory usage
-
+            if args.KD_flag:
+                accelerator.unwrap_model(ref_flux).move_to_device_except_swap_blocks(accelerator.device)
+        if args.KD_flag:
+            ref_flux = accelerator.prepare(ref_flux)
         optimizer, train_dataloader, lr_scheduler = accelerator.prepare(optimizer, train_dataloader, lr_scheduler)
 
     # たfp16　PyTorchgrad scale
@@ -729,7 +819,8 @@ def main(args):
 
     if is_swapping_blocks:
         accelerator.unwrap_model(flux).prepare_block_swap_before_forward()
-
+        if args.KD_flag:
+             accelerator.unwrap_model(ref_flux).prepare_block_swap_before_forward()
             
 
     # For --sample_at_first
@@ -743,83 +834,326 @@ def main(args):
     loss_recorder = train_util.LossRecorder()
     epoch = 0  # avoid error when max_train_steps is 0
     
-    
-    
-    print("Start grasp algo!!!!")
-    grasp_model = GRASPBaseModel(flux, accelerator, 
-                 text_encoding_strategy,  
-                 flux_tokenize_strategy,
-                 clip_l,
-                 t5xxl,
-                 ae,
-                 weight_dtype,
-                 noise_scheduler,
-                 args)
-    
-    
-    print("GRASP model loaded")
-    grasp_model.to(device=accelerator.device)
-    layers_id_double = args.compress_double_blocks_new
-    layers_id_single = args.compress_single_blocks_new
-    
-    print("Start Replace layers with GRASP layers")
-    for layer_id in tqdm(layers_id_double, desc="GRASP Compressing Double Blocks", total=len(layers_id_double), leave=True):
-        grasp_model.compress_double_block(layer_id)
-        grasp_model.to(device=accelerator.device)
-    for layer_id in tqdm(layers_id_single, desc="GRASP Compressing Single Blocks", total=len(layers_id_single), leave=True):
-        grasp_model.compress_single_block(layer_id)
-        grasp_model.to(device=accelerator.device)
+    for epoch in range(num_train_epochs):
 
-    print("Enable gradietns for S")
-    for name, param in grasp_model.model.named_parameters():
-            if name.endswith(".S"):
-                param.requires_grad = True
-            else:
-                param.requires_grad = False
-    
-    print("Get Gradients")
-    grasp_layer_grads = grasp_model.get_svdlayer_gradients(train_dataloader, device=accelerator.device, save_model_steps=args.save_every_n_steps)
-    indices_dict = grasp_model.dynamic_svd_selection(
-                grasp_layer_grads,
-                compression_ratio=args.compression_ratio
-            )
-    
-    
-    # Erstellen Sie den Pfad (falls config.output_dir existiert)
-    save_path_viz = os.path.join(args.output_dir, "svd_visualisierungs_daten.json")
-    os.makedirs(args.output_dir, exist_ok=True)
-    print("Save data")
-    try:
-        with open(save_path_viz, "w") as f:
-            # `grasp_values_dict` enthält bereits CPU-Listen 
-            # (gemäß dem GRASPBaseModel-Code)
-            json.dump(grasp_model.grasp_values_dict, f, indent=4)
-            
-        print(f"SVD-Werte und Scores zur Visualisierung gespeichert in: {save_path_viz}")
+        accelerator.print(f"\nepoch {epoch+1}/{num_train_epochs}")
+        current_epoch.value = epoch + 1
+
+        for m in training_models:
+            m.train()
+
+        for step, batch in enumerate(train_dataloader):
+            #start = time.time()
+            current_step.value = global_step
+
+            if args.blockwise_fused_optimizers:
+                optimizer_hooked_count = {i: 0 for i in range(len(optimizers))}  # reset counter for each step
+
+            with accelerator.accumulate(*training_models):
+                if "latents" in batch and batch["latents"] is not None:
+                    latents = batch["latents"].to(accelerator.device, dtype=weight_dtype)
+                else:
+                    with torch.no_grad():
+                        # encode images to latents. images are [-1, 1]
+                        latents = ae.encode(batch["images"].to(ae.dtype)).to(accelerator.device, dtype=weight_dtype)
+
+                    
+                    if torch.any(torch.isnan(latents)):
+                        accelerator.print("NaN found in latents, replacing with zeros")
+                        latents = torch.nan_to_num(latents, 0, out=latents)
+                text_encoder_outputs_list = batch.get("text_encoder_outputs_list", None)
+                if text_encoder_outputs_list is not None:
+                    text_encoder_conds = text_encoder_outputs_list
+                else:
+                    # not cached or training, so get from text encoders
+                    tokens_and_masks = batch["input_ids_list"]
+                    with torch.no_grad():
+                        input_ids = [ids.to(accelerator.device) for ids in batch["input_ids_list"]]
+                        text_encoder_conds = text_encoding_strategy.encode_tokens(
+                            flux_tokenize_strategy, [clip_l, t5xxl], input_ids, args.apply_t5_attn_mask
+                        )
+                        if args.full_fp16:
+                            text_encoder_conds = [c.to(weight_dtype) for c in text_encoder_conds]
+
+                # TODO support some features for noise implemented in get_noise_noisy_latents_and_timesteps
+
+                # Sample noise that we'll add to the latents
+                noise = torch.randn_like(latents)
+                bsz = latents.shape[0]
+
+                # get noisy model input and timesteps
+                noisy_model_input, timesteps, sigmas = flux_train_utils.get_noisy_model_input_and_timesteps(
+                    args, noise_scheduler_copy, latents, noise, accelerator.device, weight_dtype
+                )
+
+                # pack latents and get img_ids
+                packed_noisy_model_input = flux_utils.pack_latents(noisy_model_input)  # b, c, h*2, w*2 -> b, h*w, c*4
+                packed_latent_height, packed_latent_width = noisy_model_input.shape[2] // 2, noisy_model_input.shape[3] // 2
+                img_ids = flux_utils.prepare_img_ids(bsz, packed_latent_height, packed_latent_width).to(device=accelerator.device)
+
+                # get guidance: ensure args.guidance_scale is float
+                
+                # if torch.rand(1).item() < 0.7:  
+                #     # 70% der Zeit: Realismus-Training (Das, was du im Internet gelesen hast)
+                #     guidance_val = 1.0
+                #     use_ground_truth = True
+                # else:
+                #     # 30% der Zeit: Ästhetik-Distillation (Damit 3.5 später nicht kaputt geht)
+                #     # Wir fragen den Teacher: "Wie sieht Guidance 3.5 aus?"
+                #     guidance_val = torch.rand(1).item() * 2.0 + 2.0  # Random [2.0, 4.0]
+                #     use_ground_truth = False
         
-    except Exception as e:
-        print(f"Fehler beim Speichern der SVD-Werte: {e}")
-    
-    
-    
-    print("Successfully initialized GRASP base model")    
-    grasp_model.compile_grasp_model(indices_dict)
-    compressed_state_dict = grasp_model.model.state_dict()
+                guidance_vec = torch.full((bsz,), float(args.guidance_scale), device=accelerator.device)
 
-    total_params = sum(param.numel() for param in compressed_state_dict.values())
+                # call model
+                l_pooled, t5_out, txt_ids, t5_attn_mask = text_encoder_conds
+                if not args.apply_t5_attn_mask:
+                    t5_attn_mask = None
 
-    print(f"Total Parameters: {total_params}")
-    # 5. Speicherpfad definieren (Beispiel)
-    save_path = os.path.join(args.output_dir, "compressed_model.safetensors")
-    os.makedirs(args.output_dir, exist_ok=True)
-    # 6. Mit safetensors speichern (bevorzugte Methode)
-    # (Eventuell müssen Sie 'pip install safetensors' ausführen)
-    save_file(compressed_state_dict, save_path)
+                with accelerator.autocast():
+                    # YiYi notes: divide it by 1000 for now because we scale it by 1000 in the transformer model (we should not keep it but I want to keep the inputs same for the model for testing)
+                    if args.KD_flag:
+                        if args.partially_trainable_model and args.blocks_to_swap != 0:
+                            flux.prepare_block_swap_before_forward()
+                        model_pred, double_block_features, single_block_features = flux(
+                            img=packed_noisy_model_input,
+                            img_ids=img_ids,
+                            txt=t5_out,
+                            txt_ids=txt_ids,
+                            y=l_pooled,
+                            timesteps=timesteps / 1000,
+                            guidance=guidance_vec,
+                            txt_attention_mask=t5_attn_mask,
+                            KD_flag=args.KD_flag
+                        ) 
+                       
+                    else:
+                        model_pred = flux(
+                            img=packed_noisy_model_input,
+                            img_ids=img_ids,
+                            txt=t5_out,
+                            txt_ids=txt_ids,
+                            y=l_pooled,
+                            timesteps=timesteps / 1000,
+                            guidance=guidance_vec,
+                            txt_attention_mask=t5_attn_mask,
+                        )   
 
+                # unpack latents
+                model_pred = flux_utils.unpack_latents(model_pred, packed_latent_height, packed_latent_width)
 
+                # apply model prediction type
+                model_pred, weighting = flux_train_utils.apply_model_prediction_type(args, model_pred, noisy_model_input, sigmas)
+                if args.KD_flag:
+                    loss = 0
+                    if args.blocks_to_swap != 0:
+                        ref_flux.prepare_block_swap_before_forward()
+                    with accelerator.autocast():
+                        with torch.no_grad():
+                            ref_model_pred, ref_double_block_features, ref_single_block_features = ref_flux(
+                                img=packed_noisy_model_input,
+                                img_ids=img_ids,
+                                txt=t5_out,
+                                txt_ids=txt_ids,
+                                y=l_pooled,
+                                timesteps=timesteps / 1000,
+                                guidance=guidance_vec,
+                                txt_attention_mask=t5_attn_mask,
+                                KD_flag=args.KD_flag
+                            )
+                    ref_model_pred = flux_utils.unpack_latents(ref_model_pred, packed_latent_height, packed_latent_width)
+                    ref_model_pred, weighting = flux_train_utils.apply_model_prediction_type(args, ref_model_pred, noisy_model_input, sigmas)
+                    # calculate loss
+                    huber_c = train_util.get_huber_threshold_if_needed(args, timesteps, noise_scheduler)
+                    if args.final_loss_flag:
+                        l = train_util.conditional_loss(model_pred.float(), ref_model_pred.float(), args.loss_type, "none", huber_c)
+                        l_final = l.mean([1,2,3])
+                        
+                        # color_loss = compute_color_consistency_loss(model_pred, ref_model_pred)
+                        # loss += args.color_loss_weight * color_loss
+                        
+                        loss += args.final_loss_weighting * l_final
+                    if args.original_loss_flag:
+                        target = noise - latents
+                        l =  train_util.conditional_loss(model_pred.float(), target.float(), args.loss_type, "none", huber_c)
+                        l_org = l.mean([1,2,3])
+                        
+                        loss += args.original_loss_weighting * l_org
+         
+                        
+                        # -------------------- feature loss computation from Dense2MoE paper  ---------------------------
+                    if args.single_feature_loss_list:
+                        single_block_features_ = [single_block_features[i] for i in args.single_feature_loss_list]
+                        ref_single_block_features_ = [ref_single_block_features[i] for i in args.single_feature_loss_list]  
+                        l_final_abs_nograd = l_final.detach().abs()
+                        norm_single_feat_loss = normalized_feature_distillation_loss(ref_single_block_features_, single_block_features_, l_final_abs_nograd)
+                        loss +=  args.single_loss_weighting * norm_single_feat_loss
+                
+                    
+                    if args.double_feature_loss_list:
+                        double_block_features_ = [double_block_features[i] for i in args.double_feature_loss_list]
+                        ref_double_block_features_ = [ref_double_block_features[i] for i in args.double_feature_loss_list]
+                        l_final_abs_nograd = l_final.detach().abs()
+                        norm_double_feat_loss = normalized_feature_distillation_loss(ref_double_block_features_, double_block_features_, l_final_abs_nograd)
+                        loss += args.double_loss_weighting * norm_double_feat_loss
+                      
+                          
+                        # --------------------------------------------------------------------------------------------------
+                    loss = loss.mean()
+                 
 
+                else:
+                    # flow matching loss: this is different from SD3
+                    target = noise - latents
+                    # calculate loss
+                    huber_c = train_util.get_huber_threshold_if_needed(args, timesteps, noise_scheduler)
+                    loss = train_util.conditional_loss(model_pred.float(), target.float(), args.loss_type, "none", huber_c)
+                    if weighting is not None:    
+                        loss = loss * weighting
+                    if args.masked_loss or ("alpha_masks" in batch and batch["alpha_masks"] is not None):
+                        loss = apply_masked_loss(loss, batch)
+                    loss = loss.mean([1, 2, 3])
 
+                    loss_weights = batch["loss_weights"]  # 各sampleごとのweight
+                    loss = loss * loss_weights
+                    loss = loss.mean()
+                
 
+                # backward
+                accelerator.backward(loss)
+
+                if not (args.fused_backward_pass or args.blockwise_fused_optimizers):
+                    if accelerator.sync_gradients and args.max_grad_norm != 0.0:
+                        params_to_clip = []
+                        for m in training_models:
+                            params_to_clip.extend(m.parameters())
+                        accelerator.clip_grad_norm_(params_to_clip, args.max_grad_norm)
+
+                    optimizer.step()
+                    lr_scheduler.step()
+                    optimizer.zero_grad(set_to_none=True)
+                else:
+                    # optimizer.step() and optimizer.zero_grad() are called in the optimizer hook
+                    lr_scheduler.step()
+                    if args.blockwise_fused_optimizers:
+                        for i in range(1, len(optimizers)):
+                            lr_schedulers[i].step()
+
+                #print("Time one iteration: ", time.time() - start)
+            # Checks if the accelerator has performed an optimization step behind the scenes
+            if accelerator.sync_gradients:
+                progress_bar.update(1)
+                global_step += 1
+
+                optimizer_eval_fn()
+                flux_train_utils.sample_images(
+                    accelerator, args, None, global_step, flux, ae, [clip_l, t5xxl], sample_prompts_te_outputs
+                )
+
+                # 指定ステップごとにモデルを保存
+                if args.save_every_n_steps is not None and global_step % args.save_every_n_steps == 0:
+                    accelerator.wait_for_everyone()
+                    if accelerator.is_main_process:
+                        flux_train_utils.save_flux_model_on_epoch_end_or_stepwise(
+                            args,
+                            False,
+                            accelerator,
+                            save_dtype,
+                            epoch,
+                            num_train_epochs,
+                            global_step,
+                            accelerator.unwrap_model(flux),
+                        )
+                    
+                    
+                optimizer_train_fn()
+
+            current_loss = loss.detach().item()  # 平均なのでbatch sizeは関係ないはず
+            if len(accelerator.trackers) > 0:
+                logs = {"loss": current_loss
+           #             "color_loss": color_loss.detach().item(),
+                        # "norm_single_feat_loss": args.single_loss_weighting*norm_single_feat_loss.detach().item(),
+                        # "norm_double_feat_loss": args.double_loss_weighting*norm_double_feat_loss.detach().item(),
+                        # "l_final": args.final_loss_weighting*l_final.detach().item(),
+                      #  "l_org": args.original_loss_weighting*l_org.detach().item()
+                        
+                        }
+                if args.KD_flag:
+                    if args.single_feature_loss_list:
+                        logs["norm_single_feat_loss"] = args.single_loss_weighting*norm_single_feat_loss.detach().item()
+                        
+                    if args.double_feature_loss_list:
+                        logs["norm_double_feat_loss"] = args.double_loss_weighting*norm_double_feat_loss.detach().item()
+                    
+                    if args.final_loss_flag:
+                        logs["l_final"] = args.final_loss_weighting*l_final.detach().item()
+                        
+                    if args.original_loss_flag:
+                        logs["l_org"] = args.original_loss_weighting*l_org.detach().item()
+                # if args.final_loss_flag:
+                #     logs["final_loss"] = l_final.detach().item()
+                # if args.original_loss_flag:
+                #     logs["org_loss"] = l_org.detach().item()
+                # if args.feature_loss_flag:
+                #     if not len(single_block_loss)==0:
+                #         logs["single_loss"] = single_block_loss.mean(0).detach().item()
+                #     if not len(double_block_loss)==0:
+                #         logs["double_loss"] = double_block_loss.mean(0).detach().item()
+                    
+                        
+                train_util.append_lr_to_logs(logs, lr_scheduler, args.optimizer_type, including_unet=True)
+
+                accelerator.log(logs, step=global_step)
+
+            loss_recorder.add(epoch=epoch, step=step, loss=current_loss)
+            avr_loss: float = loss_recorder.moving_average
+            logs = {"avr_loss": avr_loss}  # , "lr": lr_scheduler.get_last_lr()[0]}
+            progress_bar.set_postfix(**logs)
+
+            if global_step >= args.max_train_steps:
+                break
+
+        if len(accelerator.trackers) > 0:
+            logs = {"loss/epoch": loss_recorder.moving_average}
+            accelerator.log(logs, step=epoch + 1)
+
+        accelerator.wait_for_everyone()
+
+        optimizer_eval_fn()
+        if args.save_every_n_epochs is not None:
+            if accelerator.is_main_process:
+                flux_train_utils.save_flux_model_on_epoch_end_or_stepwise(
+                    args,
+                    True,
+                    accelerator,
+                    save_dtype,
+                    epoch,
+                    num_train_epochs,
+                    global_step,
+                    accelerator.unwrap_model(flux),
+                )
+
+        flux_train_utils.sample_images(
+            accelerator, args, epoch + 1, global_step, flux, ae, [clip_l, t5xxl], sample_prompts_te_outputs
+        )
+        optimizer_train_fn()
+        
+
+    is_main_process = accelerator.is_main_process
+    # if is_main_process:
+    flux = accelerator.unwrap_model(flux)
+
+    accelerator.end_training()
+    optimizer_eval_fn()
+
+    if args.save_state or args.save_state_on_train_end:
+        train_util.save_state_on_train_end(args, accelerator)
+
+    del accelerator  # この後メモリを使うのでこれは消す
+
+    if is_main_process:
+        flux_train_utils.save_flux_model_on_train_end(args, save_dtype, epoch, global_step, flux)
+        logger.info("model saved.")
 
 
 def setup_parser() -> argparse.ArgumentParser:
@@ -878,16 +1212,6 @@ def setup_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="[EXPERIMENTAL] enable offloading of tensors to CPU during checkpointing / チェックポイント時にテンソルをCPUにオフロードする",
     )
-    parser.add_argument(
-        "--compression_ratio",
-        type=int,
-        default=0.8,
-        help="Compression Ration of Layers",
-    )
-
-
-    
-    
     return parser
 
 
@@ -897,4 +1221,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     train_util.verify_command_line_training_args(args)
     args = train_util.read_config_from_file(args, parser)
-    main(args)
+
+    train(args)
+

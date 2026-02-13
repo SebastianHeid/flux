@@ -10,12 +10,11 @@ from typing import Callable, List, Optional
 
 import accelerate
 import einops
-import hpsv2
 import numpy as np
 import torch
 from library import device_utils
 from library.device_utils import get_preferred_device, init_ipex
-from myCode.modify_model_iterative import modify_model, modify_model_it
+from myCode.modify_model import modify_model_grasp
 from networks import oft_flux
 from PIL import Image
 from pytorch_lightning import seed_everything
@@ -205,8 +204,8 @@ def generate_image(
     image_height: int,
     steps: Optional[int],
     guidance: float,
+    negative_prompt: Optional[str],
     cfg_scale: float,
-    negative_prompt: str,
 ):
     seed = seed if seed is not None else random.randint(0, 2**32 - 1)
     logger.info(f"Seed: {seed}")
@@ -388,12 +387,17 @@ if __name__ == "__main__":
     device = get_preferred_device()
 
     parser = argparse.ArgumentParser()
+    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux/transformer/transformer.safetensors")
+    # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
+    # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
+    #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
+    parser.add_argument("--prompt_json", type=str, default="/home/hd/hd_hd/hd_om233/ModelEvaluationBenchmarks/DPG_Bench/prompts.json")
     parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
@@ -403,8 +407,8 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=None, help="Number of steps. Default is 4 for schnell, 50 for dev")
     parser.add_argument("--guidance", type=float, default=3.5)
-    parser.add_argument("--cfg_scale", type=float, default=1.0)
     parser.add_argument("--negative_prompt", type=str, default=None)
+    parser.add_argument("--cfg_scale", type=float, default=1.0)
     parser.add_argument("--offload", action="store_true", help="Offload to CPU")
     parser.add_argument(
         "--lora_weights",
@@ -425,15 +429,10 @@ if __name__ == "__main__":
     parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mod", action="store_true", help="Flag")
-    parser.add_argument("--single_comp_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp2",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_attn",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp",  nargs='+', type=float, default=[], help="comp")
-    
-    parser.add_argument("--single_comp_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp2_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_attn_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--single_comp_mlp_new",  nargs='+', type=float, default=[], help="comp")
+    parser.add_argument("--single_rank_mod", type=int, default=256, help="rank")
+    parser.add_argument("--single_rank_mlp2", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_attn", type=int, default=512, help="rank")
+    parser.add_argument("--single_rank_mlp", type=int, default=512, help="rank")
     
     parser.add_argument("--double_flag_img_attn", action="store_true", help="Flag")
     parser.add_argument("--double_flag_txt_attn", action="store_true", help="Flag")
@@ -441,31 +440,31 @@ if __name__ == "__main__":
     parser.add_argument("--double_flag_txt_mlp", action="store_true", help="Flag")
     parser.add_argument("--double_flag_img_mod", action="store_true", help="Flag")
     parser.add_argument("--double_flag_txt_mod", action="store_true", help="Flag")
-    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag")
+    
+    parser.add_argument("--double_rank_img_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_img_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_attn",type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_mod", type=int, default=256, help="rank")
+    parser.add_argument("--double_rank_txt_mlp", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_txt_attn", type=int, default=512, help="rank")
     parser.add_argument("--double_flag_img_proj", action="store_true", help="Flag")
+    parser.add_argument("--double_flag_txt_proj", action="store_true", help="Flag")
+    parser.add_argument("--double_rank_txt_proj", type=int, default=512, help="rank")
+    parser.add_argument("--double_rank_img_proj", type=int, default=512, help="rank")
     
-    parser.add_argument("--double_comp_img_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_mlp",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_attn", nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mod",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mlp",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_attn",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_proj",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_proj",  nargs='+', type=float, default=[], help="comp")
-    
-    parser.add_argument("--double_comp_img_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_mlp_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_attn_new", nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mod_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_mlp_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_attn_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_txt_proj_new",  nargs='+', type=float, default=[], help="comp")
-    parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="comp")
-
+    # ------------------- geneval parameters -----------------
+   
+    parser.add_argument(
+        "--n_samples",
+        type=int,
+        default=4,
+        help="number of samples",
+    )
     args = parser.parse_args()
   
 
-    all_prompts =  hpsv2.benchmark_prompts('all')  
+    with open(args.prompt_json) as fp:
+        data  = json.load(fp)
 
     seed = args.seed
     steps = args.steps
@@ -497,8 +496,12 @@ if __name__ == "__main__":
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
     print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    model = modify_model(model,
-                         args.double_blocks,
+    print("Single: ", args.single_blocks_compress)
+    print("Double: ", args.double_blocks_compress)
+    print("Single: ", args.single_blocks)
+    print("Double: ", args.double_blocks)
+    model = modify_model_grasp(model,
+                        args.double_blocks,
                          args.single_blocks,
                         single_blocks_comp = args.single_blocks_compress,
                         double_blocks_comp = args.double_blocks_compress,
@@ -506,26 +509,22 @@ if __name__ == "__main__":
                         single_flag_mlp=args.single_flag_mlp,
                         single_flag_mlp2=args.single_flag_mlp2,
                         single_flag_mod=args.single_flag_mod,
-                        single_comp_mod=args.single_comp_mod,
-                        single_comp_mlp2=args.single_comp_mlp2,
-                        single_comp_attn=args.single_comp_attn,
-                        single_comp_mlp=args.single_comp_mlp,
+                        single_rank_mod=args.single_rank_mod,
+                        single_rank_mlp2=args.single_rank_mlp2,
+                        single_rank_attn=args.single_rank_attn,
+                        single_rank_mlp=args.single_rank_mlp,
                         double_flag_img_attn=args.double_flag_img_attn,
                         double_flag_txt_attn=args.double_flag_txt_attn,
                         double_flag_img_mlp= args.double_flag_img_mlp,
                         double_flag_txt_mlp=args.double_flag_txt_mlp,
                         double_flag_img_mod=args.double_flag_img_mod,
                         double_flag_txt_mod=args.double_flag_txt_mod,   
-                        double_comp_img_mod=args.double_comp_img_mod,
-                        double_comp_img_mlp=args.double_comp_img_mlp,
-                        double_comp_img_attn=args.double_comp_img_attn,
-                        double_comp_txt_mod=args.double_comp_txt_mod,
-                        double_comp_txt_mlp=args.double_comp_txt_mlp,
-                        double_comp_txt_attn=args.double_comp_txt_attn,
-                        double_comp_img_proj=args.double_comp_img_proj,
-                        double_comp_txt_proj=args.double_comp_txt_proj,
-                        double_flag_txt_proj=args.double_flag_txt_proj,
-                        double_flag_img_proj=args.double_flag_img_proj)
+                        double_rank_img_mod=args.double_rank_img_mod,
+                        double_rank_img_mlp=args.double_rank_img_mlp,
+                        double_rank_img_attn=args.double_rank_img_attn,
+                        double_rank_txt_mod=args.double_rank_txt_mod,
+                        double_rank_txt_mlp=args.double_rank_txt_mlp,
+                        double_rank_txt_attn=args.double_rank_txt_attn,)
     for name, param in model.named_parameters():
         if param.is_meta:
             print(f"Meta tensor found: {name}")
@@ -533,6 +532,7 @@ if __name__ == "__main__":
     if args.ckpt_path != args.ckpt_path_org:
         state_dict = load_file(args.ckpt_path)
         model.load_state_dict(state_dict)
+  
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
     
     
@@ -593,35 +593,64 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
-    for style, prompts in all_prompts.items():
+    # Iteration über das Dictionary (Key=Dateiname, Value=Prompt)
+    # WICHTIG: data.items() statt data.items verwenden
+    os.makedirs(args.output_dir, exist_ok=True)
+    for index, (key, value) in enumerate(data.items()):
         seed_everything(args.seed)
+        print(value)
+        base_name = os.path.splitext(key)[0]
+        output_filename = f"{base_name}.png"
+        save_path = os.path.join(args.output_dir, output_filename)
+        if os.path.exists(save_path):
+            print(f"Skipping {output_filename}, already exists in {args.output_dir}")
+            continue
         
+        prompt = value
+        
+        # Liste zum Sammeln der 4 Bilder
+        all_samples = []
+        
+        print(f"Generiere Grid {index+1}/{len(data)}: {output_filename}")
         
         with torch.no_grad():
-            for idx, prompt in enumerate(prompts):
-                # Generate images
-                if os.path.exists(os.path.join(args.output_dir, style, f"{idx:05d}.jpg")):
-                    print(f"Skipping {style}, already exists in {args.output_dir}")
-                    continue
+            # Generiere n_samples (Standard 4)
+            for n in range(args.n_samples):
+                
+                # Seed variieren, damit die 4 Bilder unterschiedlich sind
+                current_seed = args.seed + n if args.seed is not None else None
+
+                # Generate image
                 sample = generate_image(
-                model,
-                clip_l,
-                t5xxl,
-                ae,
-                prompt,
-                args.seed,
-                args.width,
-                args.height,
-                args.steps,
-                args.guidance,
-                args.cfg_scale,
-                args.negative_prompt
-            )
-                if not os.path.exists(os.path.join(args.output_dir, style)):
-                    os.makedirs(os.path.join(args.output_dir, style))
-                save_image(sample, os.path.join(args.output_dir, style, f"{idx:05d}.jpg"), nrow=1, normalize=True, value_range=(-1, 1))
+                    model,
+                    clip_l,
+                    t5xxl,
+                    ae,
+                    prompt,
+                    current_seed,
+                    args.width,
+                    args.height,
+                    args.steps,
+                    args.guidance,
+                    args.negative_prompt,
+                    args.cfg_scale
+                )
+                
+                # Zur Liste hinzufügen (statt sofort speichern)
+                all_samples.append(sample)
+
+        # 2. Grid erstellen und speichern
+        if len(all_samples) > 0:
+            # Liste von Tensoren zu einem Batch zusammenfügen: [4, C, H, W]
+            grid_tensor = torch.cat(all_samples, dim=0)
             
-
-
-
+            # nrow=2 erzeugt bei 4 Bildern ein 2x2 Grid
+            save_image(
+                grid_tensor, 
+                save_path, 
+                nrow=2, 
+                normalize=True, 
+                value_range=(-1, 1)
+            )
+            
     logger.info("Done!")

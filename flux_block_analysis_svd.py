@@ -714,7 +714,7 @@ if __name__ == "__main__":
             model = modify_model(
                 model,
                 args.double_blocks,
-                [s_block],
+                [s_block]+args.single_blocks,
                 single_blocks_comp=removed_single_blocks,
                 double_blocks_comp=removed_double_blocks,
                 # ... (alle flag und rank Argumente unverändert) ...
@@ -769,7 +769,7 @@ if __name__ == "__main__":
             
             model = modify_model(
                 model,
-                [d_block],
+                [d_block]+args.double_blocks,
                 args.single_blocks,
                 single_blocks_comp=removed_single_blocks,
                 double_blocks_comp=removed_double_blocks,

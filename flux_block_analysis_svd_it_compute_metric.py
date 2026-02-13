@@ -84,6 +84,7 @@ if __name__ == "__main__":
     parser.add_argument("--guidance", type=float, default=3.5)
     parser.add_argument("--negative_prompt", type=str, default=None)
     parser.add_argument("--cfg_scale", type=float, default=1.0)
+    parser.add_argument("--max_count", type=int, default=-1)
     parser.add_argument("--offload", action="store_true", help="Offload to CPU")
     parser.add_argument(
         "--lora_weights",
@@ -136,20 +137,18 @@ if __name__ == "__main__":
     RATIO = 0.6
     for s_block in args.single_block_list:
         # Berechne Metriken
-        try:
-            # ANNAHME: compute_cmmd und compute_clip sind implementiert und geben den Metrikwert zurück.
-            output_dir_block = os.path.join(args.output_dir, f"temp_iter1_single_{s_block}")
-            if s_block in args.compress_single_blocks:
-                idx = args.compress_single_blocks.index(s_block)
-                removed_params = PARAMS_SINGLE * (1-args.compression_ratio_single_blocks[idx])*(RATIO)
-            else: 
-                removed_params = PARAMS_SINGLE * RATIO
-                
-            print(removed_params)
-            cmmd_single[s_block] = compute_cmmd(args.ref_path, output_dir_block) / removed_params
-        except Exception as e:
-            logger.error(f"Fehler bei Metrikberechnung für Single Block {s_block}: {e}")
-            cmmd_single[s_block] = float('inf')
+    
+        # ANNAHME: compute_cmmd und compute_clip sind implementiert und geben den Metrikwert zurück.
+        output_dir_block = os.path.join(args.output_dir, f"temp_iter1_single_{s_block}")
+        if s_block in args.compress_single_blocks:
+            idx = args.compress_single_blocks.index(s_block)
+            removed_params = PARAMS_SINGLE * (1-args.compression_ratio_single_blocks[idx])*(RATIO)
+        else: 
+            removed_params = PARAMS_SINGLE * RATIO
+            
+        print(removed_params)
+        cmmd_single[s_block] = compute_cmmd(args.ref_path, output_dir_block, max_count=args.max_count) / removed_params
+        
           
 
         
@@ -167,7 +166,7 @@ if __name__ == "__main__":
         else: 
             removed_params = PARAMS_DOUBLE * RATIO
         output_dir_block = os.path.join(args.output_dir, f"temp_iter1_double_{d_block}")
-        cmmd_double[d_block] = compute_cmmd(args.ref_path,output_dir_block) / removed_params
+        cmmd_double[d_block] = compute_cmmd(args.ref_path,output_dir_block, max_count=args.max_count) / removed_params
 
     sorted_dict = get_sorted_block_names(cmmd_single, cmmd_double)
     # --- 3. Besten Block bestimmen und Listen aktualisieren ---
