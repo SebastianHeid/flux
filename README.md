@@ -8,7 +8,7 @@ Beispiel 80% Model: ./script/example_run_inference.sh
 
 Beispiel Training Run: ./train_script/example_run_training.slurm
 
-## Model Modification 
+## Model Modifikation 
 ./myCode/modify_model_iterative.py
 ./myCode/place_holder_blocks_all.py
 
