@@ -614,44 +614,90 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
-    for index, metadata in enumerate(metadata):
-        seed_everything(args.seed)
-        outpath = os.path.join(args.output_dir, f"{index:0>5}")
-        os.makedirs(outpath, exist_ok=True)
-        prompt = metadata['prompt']
-        
+    tasks = []
+    for original_index, meta_item in enumerate(metadata):
+        tasks.append((original_index, meta_item))
+
+    # 2. Liste zufällig mischen (basierend auf Zeit und PID für unterschiedliche Terminals)
+    random.shuffle(tasks)
+
+    for original_index, meta_item in tasks:
+        outpath = os.path.join(args.output_dir, f"{original_index:0>5}")
+        lock_path = outpath + ".lock"
         sample_path = os.path.join(outpath, "samples")
-        os.makedirs(sample_path, exist_ok=True)
-        with open(os.path.join(outpath, "metadata.jsonl"), "w") as fp:
-            json.dump(metadata, fp)
         
-        sample_count = 0
-        
-        with torch.no_grad():
-            all_samples = list()
-            for n in trange(args.n_samples, desc="Sampling"):
-                if os.path.isfile(os.path.join(sample_path, f"{sample_count:05}.jpeg")):
-                    sample_count += 1
-                    continue
-                # Generate images
-                sample = generate_image(
-                model,
-                clip_l,
-                t5xxl,
-                ae,
-                prompt,
-                args.seed+n,
-                args.width,
-                args.height,
-                args.steps,
-                args.guidance,
-                args.negative_prompt,
-                args.cfg_scale
-            )
+        # 3. Vorab-Check: Ist das Verzeichnis schon gelockt?
+        if os.path.exists(lock_path):
+            continue
+            
+        # Check, ob vielleicht schon alle n_samples fertig generiert sind
+        # (spart uns das Erstellen der Lock-Datei, wenn der Ordner eh schon komplett ist)
+        if os.path.exists(sample_path):
+            all_done = True
+            for n in range(args.n_samples):
+                if not os.path.isfile(os.path.join(sample_path, f"{n:05}.jpeg")):
+                    all_done = False
+                    break
+            if all_done:
+                print(f"Skipping {original_index:0>5}, all samples already exist.")
+                continue
+
+        # 4. Lock setzen
+        try:
+            os.makedirs(outpath, exist_ok=True)
+            with open(lock_path, 'w') as f:
+                f.write("locked")
+        except Exception:
+            # Falls es beim Erstellen des Ordners in genau derselben Millisekunde 
+            # eine Kollision mit einem anderen Prozess gab
+            continue
+
+        try:
+            prompt = meta_item['prompt']
+            os.makedirs(sample_path, exist_ok=True)
+            
+            # Metadaten speichern (nur einmal pro Ordner)
+            jsonl_path = os.path.join(outpath, "metadata.jsonl")
+            if not os.path.exists(jsonl_path):
+                with open(jsonl_path, "w") as fp:
+                    json.dump(meta_item, fp)
+            
+            with torch.no_grad():
+                # Ich nutze hier 'n' anstelle von 'sample_count' (siehe Erklärung oben)
+                for n in trange(args.n_samples, desc=f"Sampling {original_index:0>5}"):
+                    file_path = os.path.join(sample_path, f"{n:05}.jpeg")
+                    
+                    if os.path.isfile(file_path):
+                        continue
+                    
+                    current_seed = args.seed + n if args.seed is not None else None
+                    
+                    # Generate images
+                    sample = generate_image(
+                        model,
+                        clip_l,
+                        t5xxl,
+                        ae,
+                        prompt,
+                        current_seed,
+                        args.width,
+                        args.height,
+                        args.steps,
+                        args.guidance,
+                        args.negative_prompt,
+                        args.cfg_scale
+                    )
+                    
+                    save_image(sample, file_path, nrow=1, normalize=True, value_range=(-1, 1))
+                    
+        except Exception as e:
+            print(f"Fehler bei Ordner {original_index:0>5}: {e}")
+            
+        finally:
+            # Lock-Datei am Ende entfernen, damit fehlerhafte Läufe später neu gestartet werden können
+            if os.path.exists(lock_path):
+                os.remove(lock_path)
                 
-                save_image(sample, os.path.join(sample_path, f"{sample_count:05}.jpeg"), nrow=1, normalize=True, value_range=(-1, 1))
-                sample_count += 1
-               
 
 
 

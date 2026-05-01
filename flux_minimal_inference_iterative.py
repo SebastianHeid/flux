@@ -483,17 +483,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
   
 
-    prompts = [
-    "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
-    "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
-    "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
-   "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
-   "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background.",
-   "portrait of a joker like the joker in batman, he is wearing the joker outfit and makeup. He holds poker cards in his hand, glitch effects cinematic lighting, film scene, optimized lighting, ray tracing, sharpened image, film grain, super high resolution 8k ",
-   "Ultra realistic photographyMale lion roaring in front of a savanna tree National Geographic Photo, sundowner, aggressiv, Sony \u03b17 III, F 1.2 v 5",
-   "The sharp dressed black guy sits at a table in a dimly lit jazz club, his crisp black suit perfectly tailored to his athletic frame. He wears a sleek silver watch on his wrist that catches the light as he moves. Beside him sits his stunning white wife, her blonde hair swept up in an elegant bun, wearing a formfitting black dress that accentuates her curves. As they watch the band play, the mans foot taps in time to the music while his wife sways gently in her seat. The atmosphere is lively yet intimate, the perfect backdrop for a night out on the town. The jazz musicians on stage are equally stylish, their suits and instruments gleaming under the dim lights. The black guy leans in to whisper something in his wifes ear, a smile spreading across her face. They clink their glasses together in a toast, enjoying the moment as the jazz music fills the room.",
-    "a full body photo portrait of a Mexican beautiful girl during the Mexican revolution in 1914 after a battle, she has glowing eyes and dark hair, she is wearing ammo belts, ultra realistic, cinematic lighting, dust particles, light particles, professional portrait, hyper detailed, 8k, sony a7iii, sigma lens, professional color grade ",
-]
+#     prompts = [
+#     "A photograph of a majestic Bengal tiger in a lush jungle, with soft sunlight filtering through the canopy, detailed fur, and sharp focus on its eyes.",
+#     "photo of peaceful winter landscape, serene winter scenery, snow-covered path, leafless trees, overcast sky, winter forest, frozen stream, icy water, subtle blue hues, delicate snow textures, soft light, gentle snowfall, quiet atmosphere, calming environment, natural setting, tranquil riverside, bare branches, rustic road, snow-dusted bushes, delicate frost, seasonal beauty, detailed winter flora, tranquil nature scene, cold season ambiance, muted colors, soft textures",
+#     "A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.",
+#    "A bustling city street in the heart of a modern metropolis, filled with people walking on sidewalks, cars and buses in traffic, neon signs and billboards glowing, skyscrapers towering above, reflections on wet asphalt, dynamic lighting and cinematic atmosphere, photographed at street level during rush hour."
+#    "A candid photo of a person laughing, with a genuine expression, in a cozy coffee shop, with warm, inviting lighting and a soft focus on the background.",
+#    "portrait of a joker like the joker in batman, he is wearing the joker outfit and makeup. He holds poker cards in his hand, glitch effects cinematic lighting, film scene, optimized lighting, ray tracing, sharpened image, film grain, super high resolution 8k ",
+#    "Ultra realistic photographyMale lion roaring in front of a savanna tree National Geographic Photo, sundowner, aggressiv, Sony \u03b17 III, F 1.2 v 5",
+#    "The sharp dressed black guy sits at a table in a dimly lit jazz club, his crisp black suit perfectly tailored to his athletic frame. He wears a sleek silver watch on his wrist that catches the light as he moves. Beside him sits his stunning white wife, her blonde hair swept up in an elegant bun, wearing a formfitting black dress that accentuates her curves. As they watch the band play, the mans foot taps in time to the music while his wife sways gently in her seat. The atmosphere is lively yet intimate, the perfect backdrop for a night out on the town. The jazz musicians on stage are equally stylish, their suits and instruments gleaming under the dim lights. The black guy leans in to whisper something in his wifes ear, a smile spreading across her face. They clink their glasses together in a toast, enjoying the moment as the jazz music fills the room.",
+#     "a full body photo portrait of a Mexican beautiful girl during the Mexican revolution in 1914 after a battle, she has glowing eyes and dark hair, she is wearing ammo belts, ultra realistic, cinematic lighting, dust particles, light particles, professional portrait, hyper detailed, 8k, sony a7iii, sigma lens, professional color grade ",
+# ]
 
 #     # prompts = ["Ultra-realistic street scene in Tokyo at night, shallow depth of field, neon reflections on wet pavement, pedestrians holding umbrellas, cinematic bokeh lights, high-resolution lens look, 50mm perspective, subtle noise texture, soft rain falling, natural skin tones",
 #     #           "Hyper-realistic portrait of a 30-year-old woman sitting in a minimalist office, natural soft window light, neutral tones, crisp skin texture, lightweight depth of field, Nikon Z9 photography style, realistic background blur, clean corporate aesthetic",
@@ -501,12 +501,12 @@ if __name__ == "__main__":
 #     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
     
     
-#     with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
-#         data = json.load(file)
+    with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
+        data = json.load(file)
         
-#     prompts = []
-#     for d in data.values():
-#         prompts.append(d)
+    prompts = []
+    for d in data.values():
+        prompts.append(d)
     
     #prompts = [args.prompt]
     print(len(prompts))

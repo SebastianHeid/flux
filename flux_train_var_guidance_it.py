@@ -456,7 +456,8 @@ def train(args):
     
     sd.update(load_safetensors(args.pruned_model_path, device=str(device), disable_mmap=False, dtype=weight_dtype))
     info = flux.load_state_dict(sd, strict=False, assign=False)
-    
+    print("Load pruned model weights after modifying")
+    print("Info: ", info)
     flux = modify_model_it(flux,
                          args.double_blocks,
                          args.single_blocks,
@@ -490,8 +491,8 @@ def train(args):
                         double_flag_img_proj=args.double_flag_img_proj)
   
     print("Model parameters: ", sum(p.numel() for p in flux.parameters()))
-    print("Load pruned model weights after modifying")
- 
+
+  
     
     
     flux.requires_grad_(True)

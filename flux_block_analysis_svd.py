@@ -710,7 +710,7 @@ if __name__ == "__main__":
             # Lade und modifiziere das Modell
             is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
             model.eval().to(flux_dtype)
-            
+            print("Number flux model: ", sum(p.numel() for p in model.parameters()))
             model = modify_model(
                 model,
                 args.double_blocks,
@@ -726,6 +726,8 @@ if __name__ == "__main__":
                 double_rank_txt_mod=args.double_rank_txt_mod, double_rank_txt_mlp=args.double_rank_txt_mlp, double_rank_txt_attn=args.double_rank_txt_attn
             )
             
+            print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
+            
             state_dict = load_file(args.ckpt_path)
             model.load_state_dict(state_dict, strict=False)
             
@@ -734,6 +736,9 @@ if __name__ == "__main__":
             
             print("output_dir_block", output_dir_block)
             for idx_prompt, prompt in enumerate(prompts):
+                if os.path.isfile(output_dir_block+  "/prompt" + "_" + str(idx_prompt) + ".png" ):
+                    print("File exists: " + output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png" )
+                    continue
                 # Erzeuge alle Bilder für die Metrikberechnung
                 generate_image(
                     model, clip_l, t5xxl, ae, prompt, args.seed, args.width, args.height, args.steps,
@@ -766,7 +771,7 @@ if __name__ == "__main__":
             # Lade und modifiziere das Modell
             is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
             model.eval().to(flux_dtype)
-            
+            print("Number flux model: ", sum(p.numel() for p in model.parameters()))
             model = modify_model(
                 model,
                 [d_block]+args.double_blocks,
@@ -781,6 +786,7 @@ if __name__ == "__main__":
                 double_rank_img_mod=args.double_rank_img_mod, double_rank_img_mlp=args.double_rank_img_mlp, double_rank_img_attn=args.double_rank_img_attn,
                 double_rank_txt_mod=args.double_rank_txt_mod, double_rank_txt_mlp=args.double_rank_txt_mlp, double_rank_txt_attn=args.double_rank_txt_attn
             )
+            print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
             state_dict = load_file(args.ckpt_path)
             model.load_state_dict(state_dict, strict=False)
             output_dir_block = os.path.join(args.output_dir, f"temp_iter{iteration_idx}_double_{d_block}")
@@ -789,6 +795,9 @@ if __name__ == "__main__":
             generated_image_paths = []
             for idx_prompt, prompt in enumerate(prompts):
                 # Erzeuge alle Bilder für die Metrikberechnung
+                if os.path.isfile(output_dir_block+  "/prompt" + "_" + str(idx_prompt) + ".png" ):
+                    print("File exists: " + output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png" )
+                    continue
                 args.output_dir = output_dir_block
                 generate_image(
                     model, clip_l, t5xxl, ae, prompt, args.seed, args.width, args.height, args.steps,

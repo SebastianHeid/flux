@@ -392,12 +392,12 @@ if __name__ == "__main__":
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--prompt", type=str, default=" A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.")
+    parser.add_argument("--prompt_json", type=str, default="/home/hd/hd_hd/hd_om233/ModelEvaluationBenchmarks/DPG_Bench/prompts.json")
     parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
@@ -433,7 +433,6 @@ if __name__ == "__main__":
     parser.add_argument("--single_comp_mlp2",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--single_comp_attn",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--single_comp_mlp",  nargs='+', type=float, default=[], help="comp")
-    
     parser.add_argument("--single_comp_mod_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--single_comp_mlp2_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--single_comp_attn_new",  nargs='+', type=float, default=[], help="comp")
@@ -467,11 +466,7 @@ if __name__ == "__main__":
     parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="comp")
     
     # ------------------- geneval parameters -----------------
-    parser.add_argument(
-        "--metadata_file",
-        type=str,
-        help="JSONL file containing lines of metadata for each prompt"
-    )
+   
     parser.add_argument(
         "--n_samples",
         type=int,
@@ -481,8 +476,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
   
 
-    with open(args.metadata_file) as fp:
-        metadata = [json.loads(line) for line in fp]
+    with open(args.prompt_json) as fp:
+        data  = json.load(fp)
 
     seed = args.seed
     steps = args.steps
@@ -551,8 +546,9 @@ if __name__ == "__main__":
         if param.is_meta:
             print(f"Meta tensor found: {name}")
     
-    state_dict = load_file(args.ckpt_path)
-    model.load_state_dict(state_dict, strict=False)
+    if args.ckpt_path != args.ckpt_path_org:
+        state_dict = load_file(args.ckpt_path)
+        model.load_state_dict(state_dict)
   
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
     
@@ -614,45 +610,93 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
-    for index, metadata in enumerate(metadata):
-        seed_everything(args.seed)
-        outpath = os.path.join(args.output_dir, f"{index:0>5}")
-        os.makedirs(outpath, exist_ok=True)
-        prompt = metadata['prompt']
-        
-        sample_path = os.path.join(outpath, "samples")
-        os.makedirs(sample_path, exist_ok=True)
-        with open(os.path.join(outpath, "metadata.jsonl"), "w") as fp:
-            json.dump(metadata, fp)
-        
-        sample_count = 0
-        
-        with torch.no_grad():
-            all_samples = list()
-            for n in trange(args.n_samples, desc="Sampling"):
-                if os.path.isfile(os.path.join(sample_path, f"{sample_count:05}.jpeg")):
-                    sample_count += 1
-                    continue
-                # Generate images
-                sample = generate_image(
-                model,
-                clip_l,
-                t5xxl,
-                ae,
-                prompt,
-                args.seed+n,
-                args.width,
-                args.height,
-                args.steps,
-                args.guidance,
-                args.negative_prompt,
-                args.cfg_scale
-            )
+    # Iteration über das Dictionary (Key=Dateiname, Value=Prompt)
+    # WICHTIG: data.items() statt data.items verwenden
+    os.makedirs(args.output_dir, exist_ok=True)
+
+    # 1. Alle Aufgaben (Items aus dem Dictionary) in eine flache Liste packen
+    # Wir speichern den 'original_index', damit die Konsolenausgabe ("Generiere Grid 5/100") 
+    # weiterhin Sinn ergibt und nachvollziehbar bleibt.
+    tasks = []
+    for original_index, (key, value) in enumerate(data.items()):
+        tasks.append((original_index, key, value))
+
+    # 2. Liste zufällig mischen (basierend auf Zeit und Prozess-ID für Einzigartigkeit)
+ 
+    random.shuffle(tasks)
+
+    with torch.no_grad():
+        for original_index, key, value in tasks:
+            base_name = os.path.splitext(key)[0]
+            output_filename = f"{base_name}.png"
+            save_path = os.path.join(args.output_dir, output_filename)
+            lock_path = save_path + ".lock"
+            
+            # Prüfen, ob das finale Grid oder eine Lock-Datei schon existiert
+            if os.path.exists(save_path) or os.path.exists(lock_path):
+                print(f"Skipping {output_filename}, already exists or in progress.")
+                continue
                 
-                save_image(sample, os.path.join(sample_path, f"{sample_count:05}.jpeg"), nrow=1, normalize=True, value_range=(-1, 1))
-                sample_count += 1
-               
+            # Datei "reservieren", indem wir eine Lock-Datei erstellen
+            with open(lock_path, 'w') as f:
+                f.write("locked")
+                
+            try:
+                prompt = value
+                all_samples = []
+                
+                print(f"Generiere Grid {original_index+1}/{len(tasks)}: {output_filename}")
+                
+                # Generiere n_samples (Standard 4)
+                for n in range(args.n_samples):
+                    
+                    # Seed variieren, damit die Bilder im Grid unterschiedlich sind.
+                    # Wichtig: Der globale seed_everything() Aufruf in der Schleife wurde entfernt,
+                    # da er bei einer gemischten Liste zu fehlerhafter Reproduzierbarkeit führen kann.
+                    # Der current_seed, der in die Funktion gegeben wird, reicht völlig aus.
+                    current_seed = args.seed + n if args.seed is not None else None
 
+                    # Generate image
+                    sample = generate_image(
+                        model,
+                        clip_l,
+                        t5xxl,
+                        ae,
+                        prompt,
+                        current_seed,
+                        args.width,
+                        args.height,
+                        args.steps,
+                        args.guidance,
+                        args.negative_prompt,
+                        args.cfg_scale
+                    )
+                    
+                    # Zur Liste hinzufügen
+                    all_samples.append(sample)
 
-
+                # Grid erstellen und speichern
+                if len(all_samples) > 0:
+                    # Liste von Tensoren zu einem Batch zusammenfügen: [4, C, H, W]
+                    grid_tensor = torch.cat(all_samples, dim=0)
+                    
+                    # nrow=2 erzeugt bei 4 Bildern ein 2x2 Grid
+                    save_image(
+                        grid_tensor, 
+                        save_path, 
+                        nrow=2, 
+                        normalize=True, 
+                        value_range=(-1, 1)
+                    )
+                    
+            except Exception as e:
+                # Falls bei der Generierung etwas schiefgeht (z.B. Out of Memory), 
+                # fangen wir das ab, damit das Skript beim nächsten Grid weitermachen kann.
+                print(f"Fehler bei der Generierung von {output_filename}: {e}")
+                
+            finally:
+                # Lock-Datei am Ende zuverlässig löschen (auch im Fehlerfall!)
+                if os.path.exists(lock_path):
+                    os.remove(lock_path)
+            
     logger.info("Done!")

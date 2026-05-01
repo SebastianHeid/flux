@@ -105,7 +105,7 @@ if __name__ == "__main__":
     
     parser.add_argument("--double_block_list", nargs='+', type=int, default=[])
     parser.add_argument("--single_block_list", nargs='+', type=int, default=[])
-    parser.add_argument("--ref_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/image/block_investigation_compress_blocks/original")
+    parser.add_argument("--ref_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/image/original_100")
     parser.add_argument("--logdir", type=str, default="/home/hd/hd_hd/hd_om233/SVD/flux/block_analysis/result.txt")
     parser.add_argument("--prompt_path", type=str, default="/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json")
     parser.add_argument("--max_blocks_to_remove", type=int, default=15)
@@ -135,8 +135,10 @@ if __name__ == "__main__":
     print(args.single_block_list)
     PARAMS_SINGLE = 140
     RATIO = 0.6
+    
     for s_block in args.single_block_list:
         # Berechne Metriken
+        print("Single Block: ", s_block)
     
         # ANNAHME: compute_cmmd und compute_clip sind implementiert und geben den Metrikwert zurück.
         output_dir_block = os.path.join(args.output_dir, f"temp_iter1_single_{s_block}")
@@ -145,8 +147,7 @@ if __name__ == "__main__":
             removed_params = PARAMS_SINGLE * (1-args.compression_ratio_single_blocks[idx])*(RATIO)
         else: 
             removed_params = PARAMS_SINGLE * RATIO
-            
-        print(removed_params)
+        print(output_dir_block)
         cmmd_single[s_block] = compute_cmmd(args.ref_path, output_dir_block, max_count=args.max_count) / removed_params
         
           
@@ -159,7 +160,7 @@ if __name__ == "__main__":
     PARAMS_DOUBLE = 340
     RATIO = 0.6
     for d_block in args.double_block_list:
-        print(d_block)
+        print("Double Block: ", d_block)
         if d_block in args.compress_double_blocks:
             idx = args.compress_double_blocks.index(d_block)
             removed_params = PARAMS_DOUBLE * (1-args.compression_ratio_double_blocks[idx])*(RATIO)

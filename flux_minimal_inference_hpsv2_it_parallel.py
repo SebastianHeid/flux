@@ -10,6 +10,7 @@ from typing import Callable, List, Optional
 
 import accelerate
 import einops
+import hpsv2
 import numpy as np
 import torch
 from library import device_utils
@@ -204,8 +205,8 @@ def generate_image(
     image_height: int,
     steps: Optional[int],
     guidance: float,
-    negative_prompt: Optional[str],
     cfg_scale: float,
+    negative_prompt: str,
 ):
     seed = seed if seed is not None else random.randint(0, 2**32 - 1)
     logger.info(f"Seed: {seed}")
@@ -387,17 +388,12 @@ if __name__ == "__main__":
     device = get_preferred_device()
 
     parser = argparse.ArgumentParser()
-    #parser.add_argument("--ckpt_path", type=str, default="/export/scratch/sheid/flux/transformer/transformer.safetensors")
-    # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
-    # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
-    #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
     parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
     parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
     parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
     parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
     parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--prompt", type=str, default=" A close-up portrait of an elderly man with a weathered face, showing every wrinkle and detail, against a simple, dark background, shot with a shallow depth of field.")
     parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
@@ -407,8 +403,8 @@ if __name__ == "__main__":
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--steps", type=int, default=None, help="Number of steps. Default is 4 for schnell, 50 for dev")
     parser.add_argument("--guidance", type=float, default=3.5)
-    parser.add_argument("--negative_prompt", type=str, default=None)
     parser.add_argument("--cfg_scale", type=float, default=1.0)
+    parser.add_argument("--negative_prompt", type=str, default=None)
     parser.add_argument("--offload", action="store_true", help="Offload to CPU")
     parser.add_argument(
         "--lora_weights",
@@ -465,24 +461,11 @@ if __name__ == "__main__":
     parser.add_argument("--double_comp_txt_attn_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--double_comp_txt_proj_new",  nargs='+', type=float, default=[], help="comp")
     parser.add_argument("--double_comp_img_proj_new",  nargs='+', type=float, default=[], help="comp")
-    
-    # ------------------- geneval parameters -----------------
-    parser.add_argument(
-        "--metadata_file",
-        type=str,
-        help="JSONL file containing lines of metadata for each prompt"
-    )
-    parser.add_argument(
-        "--n_samples",
-        type=int,
-        default=4,
-        help="number of samples",
-    )
+
     args = parser.parse_args()
   
 
-    with open(args.metadata_file) as fp:
-        metadata = [json.loads(line) for line in fp]
+    all_prompts =  hpsv2.benchmark_prompts('all')  
 
     seed = args.seed
     steps = args.steps
@@ -514,10 +497,6 @@ if __name__ == "__main__":
     logger.info(f"Casting model to {flux_dtype}")
     model.to(flux_dtype)  # make sure model is dtype
     print("Number of original flux model: ", sum(p.numel() for p in model.parameters()))
-    print("Single: ", args.single_blocks_compress)
-    print("Double: ", args.double_blocks_compress)
-    print("Single: ", args.single_blocks)
-    print("Double: ", args.double_blocks)
     model = modify_model(model,
                          args.double_blocks,
                          args.single_blocks,
@@ -551,9 +530,9 @@ if __name__ == "__main__":
         if param.is_meta:
             print(f"Meta tensor found: {name}")
     
-    state_dict = load_file(args.ckpt_path)
-    model.load_state_dict(state_dict, strict=False)
-  
+    if args.ckpt_path != args.ckpt_path_org:
+        state_dict = load_file(args.ckpt_path)
+        model.load_state_dict(state_dict)
     print("Number of compressed flux model: ", sum(p.numel() for p in model.parameters()))
     
     
@@ -614,44 +593,50 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
-    for index, metadata in enumerate(metadata):
-        seed_everything(args.seed)
-        outpath = os.path.join(args.output_dir, f"{index:0>5}")
-        os.makedirs(outpath, exist_ok=True)
-        prompt = metadata['prompt']
-        
-        sample_path = os.path.join(outpath, "samples")
-        os.makedirs(sample_path, exist_ok=True)
-        with open(os.path.join(outpath, "metadata.jsonl"), "w") as fp:
-            json.dump(metadata, fp)
-        
-        sample_count = 0
-        
-        with torch.no_grad():
-            all_samples = list()
-            for n in trange(args.n_samples, desc="Sampling"):
-                if os.path.isfile(os.path.join(sample_path, f"{sample_count:05}.jpeg")):
-                    sample_count += 1
-                    continue
-                # Generate images
+    tasks = []
+    for style, prompts in all_prompts.items():
+        for idx, prompt in enumerate(prompts):
+            tasks.append((style, idx, prompt))
+
+    random.shuffle(tasks)
+    seed_everything(args.seed)
+    with torch.no_grad():
+        for style, idx, prompt in tasks:
+            style_dir = os.path.join(args.output_dir, style)
+            os.makedirs(style_dir, exist_ok=True)
+            
+            final_path = os.path.join(style_dir, f"{idx:05d}.jpg")
+            lock_path = final_path + ".lock"
+            
+            # Prüfen, ob das Bild schon fertig ist ODER gerade von einem anderen Terminal bearbeitet wird
+            if os.path.exists(final_path) or os.path.exists(lock_path):
+                print(f"Skipping {style} idx {idx}, already exists or in progress.")
+                continue
+            with open(lock_path, 'w') as f:
+                f.write("locked")
+            
+            try:
                 sample = generate_image(
                 model,
                 clip_l,
                 t5xxl,
                 ae,
                 prompt,
-                args.seed+n,
+                args.seed,
                 args.width,
                 args.height,
                 args.steps,
                 args.guidance,
-                args.negative_prompt,
-                args.cfg_scale
+                args.cfg_scale,
+                args.negative_prompt
             )
-                
-                save_image(sample, os.path.join(sample_path, f"{sample_count:05}.jpeg"), nrow=1, normalize=True, value_range=(-1, 1))
-                sample_count += 1
-               
+                if not os.path.exists(os.path.join(args.output_dir, style)):
+                    os.makedirs(os.path.join(args.output_dir, style))
+                save_image(sample, os.path.join(args.output_dir, style, f"{idx:05d}.jpg"), nrow=1, normalize=True, value_range=(-1, 1))
+            finally:
+                # Lock-Datei am Ende wieder aufräumen (auch wenn das Skript bei diesem Bild abstürzt)
+                if os.path.exists(lock_path):
+                    os.remove(lock_path)
 
 
 

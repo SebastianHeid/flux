@@ -813,8 +813,11 @@ if __name__ == "__main__":
             os.makedirs(output_dir_block, exist_ok=True)
             
             print("output_dir_block", output_dir_block)
+            
             for idx_prompt, prompt in enumerate(prompts):
-                if os.path.isfile(output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png" ):
+                print(output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png")
+                if os.path.isfile(output_dir_block+  "/prompt" + "_" + str(idx_prompt) + ".png" ):
+                    print("File exists: " + output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png" )
                     continue
                 # Erzeuge alle Bilder für die Metrikberechnung
                 generate_image(
@@ -932,7 +935,8 @@ if __name__ == "__main__":
 
             for idx_prompt, prompt in enumerate(prompts):
                 # Erzeuge alle Bilder für die Metrikberechnung
-                if os.path.isfile(output_dir_block+  "prompt" + "_" + str(idx_prompt) + ".png" ):
+                if os.path.isfile(output_dir_block+  "/prompt" + "_" + str(idx_prompt) + ".png" ):
+                    print("File exists: " + output_dir_block+  "/prompt" + "_" + str(idx_prompt) + ".png" )
                     continue
       
                 generate_image(

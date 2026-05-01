@@ -453,15 +453,15 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
-    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
-    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
-    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/clip/model.safetensors")
+    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/t5xxl/model.safetensors")
+    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
-    parser.add_argument("--prompt", type=str, default="Imagine a deserted beach in Borac\u00e9ia, S\u00e3o Paulo, Brazil, with ruins of an ancient alien spacecraft stranded there for many years. The beach is surrounded by lush tropical vegetation native to Brazil, and the sun is shining brightly. The ruins of the spacecraft are visible on the sandy beach, with intricate details and symbols that suggest advanced extraterrestrial technology. The image is ultrarealistic, with no defects, and has a definition of 8K, making it incredibly detailed and immersive ")
-    parser.add_argument("--output_dir", type=str, default="")
+    parser.add_argument("--prompt", type=str, default="A dog. ")
+    parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/")
     parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
     parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
@@ -490,7 +490,7 @@ if __name__ == "__main__":
     parser.add_argument("--single_blocks_compress", nargs='+', type=int, default=[])
     parser.add_argument("--double_blocks_compress", nargs='+', type=int, default=[])
     #parser.add_argument("--single_blocks", nargs='+', type=int, default=[])
-    parser.add_argument("--image_name", type=str, default="49eb404f37e5a5254791f2db31e0016a08f78607_2365238057.png")
+    parser.add_argument("--image_name", type=str, default="flux_dog4.png")
     parser.add_argument("--single_flag_attn", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp", action="store_true", help="Flag")
     parser.add_argument("--single_flag_mlp2", action="store_true", help="Flag")
@@ -538,14 +538,14 @@ if __name__ == "__main__":
 #     #           "A colossal ancient marble statue cracking open to reveal warm golden energy inside, dust and stone fragments floating, dramatic god-like atmosphere, dark museum hall, chiaroscuro lighting, mythological epic tone, ultra-detailed stone texture"]
     
     
-    with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
-        data = json.load(file)
+    # with open("/home/hd/hd_hd/hd_om233/partially_removal/100_prompts_laion.json", "r") as file:
+    #     data = json.load(file)
         
-    prompts = []
-    for d in data.values():
-        prompts.append(d)
+    # prompts = []
+    # for d in data.values():
+    #     prompts.append(d)
     
-    #prompts = [args.prompt]
+    prompts = [args.prompt]
     print(len(prompts))
     print(prompts[0])
     seed = args.seed

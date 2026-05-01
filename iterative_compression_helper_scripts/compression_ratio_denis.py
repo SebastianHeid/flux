@@ -61,18 +61,70 @@ for i in range(NUM_SINGLE_BLOCKS):
     param_counts[f"single_block_{i}"] = PARAM_SINGLE
 
 # ----------------------------- Parameters to specify ------------------------------------------------
-ranked_list = ['double_block_14', 'double_block_5', 'double_block_9', 'double_block_10', 'double_block_13', 'double_block_12', 'double_block_7', 'double_block_6', 'double_block_11', 'double_block_17', 'double_block_4', 'double_block_15', 'single_block_27', 'double_block_3', 'double_block_1', 'single_block_28', 'single_block_22', 'single_block_14', 'single_block_23', 'double_block_18', 'double_block_16', 'single_block_0', 'single_block_20', 'single_block_31', 'single_block_18', 'single_block_4', 'single_block_25', 'single_block_13', 'single_block_21', 'double_block_8', 'single_block_11', 'single_block_37', 'single_block_17', 'single_block_34', 'single_block_12', 'single_block_19', 'double_block_0', 'single_block_24', 'single_block_3', 'single_block_26', 'single_block_10', 'single_block_32', 'single_block_36', 'single_block_16', 'single_block_5', 'single_block_8', 'single_block_1', 'single_block_2', 'single_block_9', 'single_block_30', 'single_block_33', 'single_block_15', 'single_block_6', 'single_block_7', 'single_block_35', 'single_block_29'] 
+ranked_list = [
+  "double_block_13",
+  "double_block_16",
+  "double_block_5",
+  "double_block_3",
+  "double_block_17",
+  "double_block_8",
+  "double_block_15",
+  "double_block_6",
+  "double_block_14",
+  "double_block_18",
+  "double_block_7",
+  "double_block_4",
+  "double_block_10",
+  "double_block_12",
+  "double_block_11",
+  "double_block_9",
+  "double_block_1",
+  "double_block_0",
+  "single_block_0",
+  "single_block_33",
+  "single_block_30",
+  "single_block_2",
+  "single_block_5",
+  "single_block_13",
+  "single_block_22",
+  "single_block_1",
+  "single_block_15",
+  "single_block_18",
+  "single_block_8",
+  "single_block_19",
+  "single_block_28",
+  "single_block_3",
+  "single_block_26",
+  "single_block_12",
+  "single_block_37",
+  "single_block_6",
+  "single_block_34",
+  "single_block_31",
+  "single_block_27",
+  "single_block_16",
+  "single_block_21",
+  "single_block_25",
+  "single_block_7",
+  "single_block_10",
+  "single_block_11",
+  "single_block_36",
+  "single_block_14",
+  "single_block_32",
+  "single_block_4",
+  "single_block_20"
+]
+
 N_TOP = 30           # Wir betrachten die ersten 40 Blöcke aus dem Ranking
-START_VAL = 0.35     # Bester Block soll um weitere 30% (des Rests) reduziert werden
+START_VAL = 0.25     # Bester Block soll um weitere 30% (des Rests) reduziert werden
 TOTAL_TARGET = 1.19*10**9  # Anzahl Parameter die entfernt werden sollen
 
 
-single_blocks_ids = [0, 33, 30, 2, 5, 13, 22, 1, 15, 18, 8, 19, 16, 6, 26, 7, 21, 27, 12, 24, 3, 17, 37]
+single_blocks_ids = []
 
-double_blocks_ids = [13, 16, 5, 3, 17, 8, 15, 6, 14, 18, 7, 4, 10, 12, 11, 9, 1, 0]
+double_blocks_ids = []
 
-single_ratios = [0.1004, 0.2799, 0.3046, 0.2098, 0.0671, 0.0588, 0.0505, 0.1879, 0.2904, 0.1802, 0.0172, 0.133, 0.2968, 0.2571, 0.2812, 0.1079, 0.102, 0.0961, 0.0902, 0.0843, 0.0784, 0.1184, 0.1117]
-double_ratios = [0.5492, 0.5632, 0.4991, 0.4923, 0.529, 0.569, 0.4978, 0.5573, 0.4747, 0.4832, 0.4886, 0.4961, 0.5029, 0.4555, 0.5029, 0.4405, 0.4136, 0.5321]
+single_ratios = []
+double_ratios = []
 # ---------------------------------------------------------------------------------------------------
 
 prev_compression_ratios = {}

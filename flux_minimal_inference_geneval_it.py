@@ -631,6 +631,7 @@ if __name__ == "__main__":
             all_samples = list()
             for n in trange(args.n_samples, desc="Sampling"):
                 if os.path.isfile(os.path.join(sample_path, f"{sample_count:05}.png")):
+                    sample_count += 1
                     continue
                 # Generate images
                 sample = generate_image(
