@@ -7,7 +7,6 @@ import math
 import os
 import random
 from typing import Callable, List, Optional
-
 import accelerate
 import einops
 import numpy as np
@@ -391,15 +390,15 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
-    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
-    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
+    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/clip/model.safetensors")
+    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/t5xxl/model.safetensors")
+    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
     parser.add_argument("--prompt_json", type=str, default="/home/hd/hd_hd/hd_om233/ModelEvaluationBenchmarks/DPG_Bench/prompts.json")
     parser.add_argument("--output_dir", type=str, default="/home/hd/hd_hd/hd_om233/flux/image/FastFlux/43_it")
-    parser.add_argument("--dtype", type=str, default="bfloat16", help="base dtype")
+    parser.add_argument("--dtype", type=str, default="float8", help="base dtype")
     parser.add_argument("--clip_l_dtype", type=str, default=None, help="dtype for clip_l")
     parser.add_argument("--ae_dtype", type=str, default=None, help="dtype for ae")
     parser.add_argument("--t5xxl_dtype", type=str, default=None, help="dtype for t5xxl")
@@ -502,7 +501,7 @@ if __name__ == "__main__":
     else:
         accelerator = None
         
-        
+    print(use_fp8)    
     print(loading_device)
     is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
     model.eval()
@@ -612,6 +611,13 @@ if __name__ == "__main__":
 
     # Iteration über das Dictionary (Key=Dateiname, Value=Prompt)
     # WICHTIG: data.items() statt data.items verwenden
+    
+    ### casting model to fp8
+    #quantize_(model, float8_weight_only())
+    # Gibt den Datentyp der Gewichte aus (z.B. torch.bfloat16 oder torch.float8_e4m3fn)
+    print("Model dtype:", next(model.parameters()).dtype)
+    ######
+    
     os.makedirs(args.output_dir, exist_ok=True)
     for index, (key, value) in enumerate(data.items()):
         seed_everything(args.seed)

@@ -3,7 +3,7 @@ from typing import Tuple, Union, Optional, Literal
 import torch
 import torch.nn as nn
 from GRASP.model_parts import SingleStreamBlockGRASPCompressed, DoubleStreamBlockGRASPCompressed, SingleStreamBlockGRASP, DoubleStreamBlockGRASP
-from myCode.place_holder_blocks_all import (
+from myCode.place_holder_blocks_all_fp8 import (
     DoubleStreamBlockPruned,
     Identity,
     IdentityD,

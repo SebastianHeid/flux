@@ -400,12 +400,12 @@ if __name__ == "__main__":
     # parser.add_argument("--clip_l", type=str, default="/export/scratch/sheid/flux/text_encoder/model.safetensors")
     # parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/.cache/hub/models--google--t5-v1_1-xxl/snapshots/3db68a3ef122daf6e605701de53f766d671c19aa/model.safetensors")
     #parser.add_argument("--t5xxl", type=str, default="/export/scratch/sheid/flux/text_encoder_2/model.safetensors")
-    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/flux/flux1-dev.safetensors")
-    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
-    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/clip/model.safetensors")
-    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/t5xxl/model.safetensors")
-    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux/model_flux/ae/ae.safetensors")
+    parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    parser.add_argument("--ckpt_path_org", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/flux/flux1-dev.safetensors")
+    #parser.add_argument("--ckpt_path", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/flux/pix_wave_freeze_double_blocks4_3/test-step00001000.safetensors")
+    parser.add_argument("--clip_l", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/clip/model.safetensors")
+    parser.add_argument("--t5xxl", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/t5xxl/model.safetensors")
+    parser.add_argument("--ae", type=str, default="/gpfs/bwfor/work/ws/hd_om233-flux2/model_flux/ae/ae.safetensors")
     parser.add_argument("--apply_t5_attn_mask", action="store_true")
     parser.add_argument("--prompt", type=str, default="Photorealistic, front of escape room, marketing photo, sunset, beautiful photo ")
     parser.add_argument("--output_dir", type=str, default="")
@@ -690,6 +690,15 @@ if __name__ == "__main__":
         #for idx, (prompt_name,  prompt) in enumerate(prompts.items()):
         for idx, prompt in enumerate(prompts):
             print(prompt)
+            import time
+          
+
+            # 1. Sicherstellen, dass alle vorherigen GPU-Aufgaben abgeschlossen sind
+            if torch.cuda.is_available():
+                torch.cuda.synchronize()
+
+            # 2. Timer starten (perf_counter ist genauer als time.time)
+            start_time = time.perf_counter()
             generate_image(
                 model,
                 clip_l,
@@ -707,6 +716,15 @@ if __name__ == "__main__":
               #  prompt_name = prompt_name
               prompt_name="image"
             )
+            if torch.cuda.is_available():
+    torch.cuda.synchronize()
+
+    # 5. Timer stoppen
+    end_time = time.perf_counter()
+
+    # 6. Zeit berechnen und ausgeben
+    execution_time = end_time - start_time
+    print(f"⏳ Bildgenerierung abgeschlossen in: {execution_time:.2f} Sekunden")
     else:
         # loop for interactive
         width = target_width

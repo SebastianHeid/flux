@@ -490,7 +490,7 @@ if __name__ == "__main__":
     else:
         accelerator = None
         
-        
+    print(use_fp8)    
     print(loading_device)
     is_schnell, model = flux_utils.load_flow_model(args.ckpt_path_org, None, loading_device)
     model.eval()
@@ -537,7 +537,7 @@ if __name__ == "__main__":
     
     
     
-
+    model.to(flux_dtype)
     logger.info(f"Loading t5xxl from {args.t5xxl}...")
     t5xxl = flux_utils.load_t5xxl(args.t5xxl, t5xxl_dtype, loading_device)
     #t5xxl = T5EncoderModel.from_pretrained("google/t5-v1_1-xxl")
@@ -593,6 +593,14 @@ if __name__ == "__main__":
 
         lora_models.append(lora_model)
 
+    ### casting model to fp8
+    # model.to(torch.float8_e4m3fn)
+    
+    first_param = next(model.parameters())
+    print(f"The transformer is currently running in: {first_param.dtype}")
+    ######
+    
+    
     for style, prompts in all_prompts.items():
         seed_everything(args.seed)
         
